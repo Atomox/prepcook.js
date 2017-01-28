@@ -6,6 +6,11 @@
 Templating based on concepts from handlebars.js and angular.js.
 
 
+## Requirements:
+
+Make sure to have [bistro.tree.js](https://github.com/Atomox/bistro.js.tree/blob/master/bistro.js.tree.js), the underlying tree data structure we use to process your templates with.
+
+
 ## Using it is simple.
 
 Just require the package's module:
@@ -16,11 +21,6 @@ Just require the package's module:
 And run it against a template, with a context:
 
 ```var output = prepcook.processTemplate(data, template);```
-
-
-## Requirements:
-
-Make sure to have [bistro.tree.js](https://github.com/Atomox/bistro.js.tree/blob/master/bistro.js.tree.js), the underlying tree data structure we use to process your templates with.
 
 
 ### Simple code, with formatting:
