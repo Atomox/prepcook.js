@@ -18,6 +18,11 @@ And run it against a template, with a context:
 ```var output = prepcook.processTemplate(data, template);```
 
 
+## Requirements:
+
+Make sure to have [bistro.tree.js](https://github.com/Atomox/bistro.js.tree/blob/master/bistro.js.tree.js), the underlying tree data structure we use to process your templates with.
+
+
 ### Simple code, with formatting:
 
 
@@ -91,8 +96,3 @@ And run it against a template, with a context:
 	{{ #if 2 == 2 }} <p>2 == 2</p>	{{ /if }}
 	{{ #if foo.bar.baz == 123 }} <p>2 == 2</p>	{{ /if }}
 ```
-
-
-## Requirements:
-
-Make sure to have [bistro.tree.js](https://github.com/Atomox/bistro.js.tree/blob/master/bistro.js.tree.js), the underlying tree data structure we use to process your templates with.
