@@ -6,7 +6,7 @@
 Templating based on concepts from handlebars.js and angular.js.
 
 
-## Use:
+## Using it is simple.
 
 Just require the package's module:
 
@@ -39,13 +39,13 @@ And run it against a template, with a context:
 
 ### Loops
 ```
-	<div class="People">
-			#each people }}
-				{{ #if first != last }}
-					<li> {{ [first|string] [last|string] }} </li>
-				{{ /if
-			/each }}
-	</div>
+	<ul>
+		{{ #each people }}
+			{{ #if first != last }}
+				<li> {{ [first|string] [last|string] }} </li>
+			{{ /if
+		/each }}
+	</ul>
 
 	#each foo }}
 		{{ #each bar }}
@@ -91,3 +91,8 @@ And run it against a template, with a context:
 	{{ #if 2 == 2 }} <p>2 == 2</p>	{{ /if }}
 	{{ #if foo.bar.baz == 123 }} <p>2 == 2</p>	{{ /if }}
 ```
+
+
+## Requirements:
+
+Make sure to have `bistro.tree.js`, the underlying tree data structure we use to process your templates with.
