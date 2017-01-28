@@ -95,4 +95,4 @@ And run it against a template, with a context:
 
 ## Requirements:
 
-Make sure to have `bistro.tree.js`, the underlying tree data structure we use to process your templates with.
+Make sure to have [bistro.tree.js](https://github.com/Atomox/bistro.js.tree/blob/master/bistro.js.tree.js), the underlying tree data structure we use to process your templates with.
