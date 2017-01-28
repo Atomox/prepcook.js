@@ -1,0 +1,26 @@
+{
+  "name": "prepcook.js",
+  "version": "0.0.4",
+  "description": "A small template endgine made for bistro.js.",
+  "main": "chef.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node chef.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Atomox/bistro.js.git"
+  },
+  "keywords": [
+    "template engine"
+  ],
+  "author": "Atomox",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Atomox/bistro.js/issues"
+  },
+  "homepage": "https://github.com/Atomox/bistro.js#readme",
+  "dependencies": {
+    "bistro.js.tree": "^0.0.0"
+  }
+}
