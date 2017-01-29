@@ -1,6 +1,6 @@
 #prepCook.js
 
-**A simple templating engine built in Node.js, originally for the Bistro.js CMS.**
+**A simple templating engine built in Node.js developed for [Bistro.js](https://github.com/Atomox/bistro.js).**
 
 
 Templating based on concepts from handlebars.js and angular.js.

@@ -1,10 +1,11 @@
 var parsutil = parsutil || require('./includes/prepcook.utils'),
 	parsetree = parsetree || require('./includes/prepcook.parse-tree'),
-	stack = stack || require('./includes/prepcook.stack');
+	stack = stack || require('./includes/prepcook.stack'),
+	lang = lang || require('./prepcook.language');
 
 
 var chef = (function chefFactory() {
-const BISTRO_FAILURE = '__FAILURE';
+	const BISTRO_FAILURE = '__FAILURE';
 
 	/**
 	 * Given a template and some contextual data, parse, evaluate,
@@ -91,6 +92,13 @@ const BISTRO_FAILURE = '__FAILURE';
 							break;
 
 						case 'terminus':
+
+							// Make sure this terminus is matching the parent, or fail.
+							// E.G. /if should not occur while #each is the most recent parent. #each should be closed,
+							// first (or a new #if placed as a child of #if).
+							if (command.word.replace('/', '#') !== parents.peek().data.type) {
+								throw new Error('Encountered a terminus (' + command.word + ') but expected (' + parents.peek().data.type.replace('#', '/') + ').');
+							}
 							// If the block_terminus pairs with the parent type,
 							// pop the next element off the stack, and make it the parent.
 							parents.pop();
@@ -137,6 +145,21 @@ const BISTRO_FAILURE = '__FAILURE';
 	}
 
 
+	/**
+	 * Travel the parse tree, evaluating each node, and returning the final translation.
+	 * 
+	 * @param  {node} node
+	 *   The highest (root) segment of the remaining parse tree.
+	 *   Start by passing the root node here (not the tree).
+	 * @param  {object} data
+	 *   The contextual data. Pass the current level of relevent data where the tree's
+	 *   leaves should look for their variables.
+	 * @param  {int} level
+	 *   The current depth of the tree. Defaults to 0.
+	 * 
+	 * @return {string}
+	 *    The resolved tree, including resolved commands and tokens.
+	 */
 	function traverseParseTree (node, data, level) {
  
         if (typeof node === 'undefined') {
@@ -151,6 +174,7 @@ const BISTRO_FAILURE = '__FAILURE';
             offset = Array(level+1).join(' '),
             result = '';
 
+        // Check the current node's data, and apply it's data, if applicable.
         if (node.data && node.data.data) {
         	switch (node.data.type) {
         		
@@ -164,14 +188,15 @@ const BISTRO_FAILURE = '__FAILURE';
 							}
 						]) 
 						: '';
-					console.log('expression:', node.data.data);
         			break;
         		
         		case '#if':
-        			if (evalConditional('if', node.data.data, data) === true) {
+        			if (evalConditional('if', node.data.data, data) === true) { 
         				console.log(node.data.data, 'evaluates to', 'true');
         			}
         			else {
+        				// If our conditional failed, it's line has ended.
+        				// Do not containue to it's decendants.
         				console.log(node.data.data, 'evaluates to', 'false');
         				return result;
         			}
@@ -182,9 +207,7 @@ const BISTRO_FAILURE = '__FAILURE';
         	}
         }
 
-
-
-
+        // Loops render their decendants more than once, generally.
         if (node.data && typeof node.data.type !== 'undefined' && node.data.type == '#each') {
 
         	console.log(node.data.data, ' -> ', data[node.data.data], typeof data[node.data.data]);
@@ -193,15 +216,13 @@ const BISTRO_FAILURE = '__FAILURE';
         		for (var i = 0; i < data[node.data.data].length; i++) {
 			        for (var j = 0; j < children.length; j++) {
 			            if (children[j]) {
-			               result += traverseParseTree(children[j], data[node.data.data][i], (level+1));
-			            }
-			            else {
-			            	result += 'No children';
+			            	result += traverseParseTree(children[j], data[node.data.data][i], (level+1));
 			            }
 			        }        			
         		}
         	}
         }
+        // Non-Loops only render once.
         else {
 	        for (var j = 0; j < children.length; j++) {
 	            if (children[j]) {
@@ -214,26 +235,31 @@ const BISTRO_FAILURE = '__FAILURE';
 	}
 
 
+	/**
+	 * Check for any reserve words, identify their segments from other reserve words, and return their object definition for the parse tree.
+	 * 
+	 * @param  {string} segment
+	 *   A block a code found in a code block, whcih may contain reserve words.
+	 * 
+	 * @return {object|boolean}
+	 *   If a reserve word was found, the reserve word object, as well as the
+	 *   remainder segment to be processed on the next call. Otherwise, FALSE,
+	 *   if none were found.
+	 *
+	 * @see prepcook.language.js for reserve word definitions.
+	 */
 	function parseReserveWord (segment) {
 
 		if (segment && segment.length > 0) {
 			// Get the very next reserve word.
-			var reserve_words = ['#each', '#if', '#else', '/each', '/if'];
-			var reserve_word_types = {
-				'#each': 'block',
-				'#if': 'block',
-				'#else': 'block_terminus',
-				'/each': 'terminus',
-				'/if': 'terminus'
-			}
 			var remainder = '';
 
 			// Find the first occuring word, and pivot on it.
-			if (first = parsutil.firstOccuring(reserve_words, segment)) {
+			if (first = parsutil.firstOccuring(lang.reserveWordList(), segment)) {
 
 				var temp = parsutil.splitOnce (segment, first);
 
-				if (!reserve_word_types[first]) {
+				if (!lang.getWord(first)) {
 					throw new Error('Lexical Analysis for term "' + first + '" failed.');
 				}
 
@@ -245,7 +271,7 @@ const BISTRO_FAILURE = '__FAILURE';
 				// Instead, pass back as a remainder, so we can continue parsing commands,
 				// one at a time.
 				if (segment.length > 0) {
-					if (second = parsutil.firstOccuring(reserve_words, segment)) {
+					if (second = parsutil.firstOccuring(lang.reserveWordList(), segment)) {
 						var temp2 = parsutil.splitOnce (segment, second);
 						segment = temp2[0];
 						remainder = temp2[1] ? second + temp2[1] : second + '';
@@ -253,7 +279,7 @@ const BISTRO_FAILURE = '__FAILURE';
 				}
 
 				return {
-					type: reserve_word_types[first], 
+					type: lang.getWord(first).behavior, 
 					word: first,
 					segment: segment.trim(),
 					remainder: remainder
@@ -265,6 +291,29 @@ const BISTRO_FAILURE = '__FAILURE';
 	}
 
 
+	/**
+	 * Find the next occuring code block segment in code, and return it.
+	 *
+	 * Any non-code block code (constants, like HTML), found before the
+	 * first block will be returned as left. Anything found after the
+	 * end of the first occuring code block will be returned as right.
+	 * 
+	 * @param  {string} segment
+	 *   A string, with possible code blocks within it, defignated between 
+	 *   delimeter_left and delimeter_right.  
+	 * @param  {string} delimeter_left
+	 *   The character(s) signifying the start of the code block.
+	 * @param  {string} delimeter_right
+	 *   The character(s) signifying the end of the code block.
+	 * 
+	 * @return {object}
+	 *   An object with:
+	 *   left:       All text occuring before the first
+	 *   			 delimeter_left is found.
+	 *   segment:    All text found within the first delimeter_left
+	 *   			 and first delimeter_right.
+	 *   right: 	 All text occuring after the segment, returned unprocessed.
+	 */
 	function parseNextSegment (segment, delimeter_left, delimeter_right) {
 
 		// Get everything up to our opening paren, and add to complete.
