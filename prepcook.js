@@ -96,7 +96,7 @@ var chef = (function chefFactory() {
 							// Make sure this terminus is matching the parent, or fail.
 							// E.G. /if should not occur while #each is the most recent parent. #each should be closed,
 							// first (or a new #if placed as a child of #if).
-							if (command.word.replace('/', '#') !== parents.peek().data.type) {
+							if (!lang.terminusMatch(command.word, parents.peek().data.type)) {
 								throw new Error('Encountered a terminus (' + command.word + ') but expected (' + parents.peek().data.type.replace('#', '/') + ').');
 							}
 							// If the block_terminus pairs with the parent type,

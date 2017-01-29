@@ -26,7 +26,7 @@ var lang = (function languageFactory() {
 		'#unless': {
 				type: 'block',
 				behavior: 'conditional',
-				start: 'unless',
+				start: '#unless',
 				end: '/unless'
 			}
 	};
@@ -50,13 +50,37 @@ var lang = (function languageFactory() {
 		return false;
 	}
 
+
+	/**
+	 * Is (end) a valid ending reserve word for (start)?
+	 * 
+	 * @param  {string} end
+	 *   A reserve word terminus.
+	 * @param  {string} start
+	 *   Some reserve word we should check for compatability with end.
+	 * 
+	 * @return {boolean}
+	 *   TRUE if end is a valid match. Otherwise, FALSE.
+	 */
+	function terminusMatch (end, start) {
+		if (my_word = getWordDefinition(start)) {
+			if (my_word.end == end) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	return {
 		getWordList: getWordList,
-		getWord: getWordDefinition
+		getWord: getWordDefinition,
+		terminusMatch: terminusMatch
 	};
 })();
 
 module.exports = {
 	reserveWordList: lang.getWordList,
-	getWord: lang.getWord
+	getWord: lang.getWord,
+	terminusMatch: lang.terminusMatch
 };
