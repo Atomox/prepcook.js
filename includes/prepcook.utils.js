@@ -1,4 +1,4 @@
-const BISTRO_FAILURE = '__FAILURE';
+const BISTRO_FAILURE = BISTRO_FAILURE || '__FAILURE';
 
 var server_utils = (function utils() {
 
@@ -155,15 +155,54 @@ var server_utils = (function utils() {
 		return BISTRO_FAILURE;
 	}
 
+
+	/**
+	 * Given an exression in a template passed as part of a reserve word,
+	 * normalize the value, so it maybe be properly evaluated.
+	 * 
+	 * @param  {string} exp
+	 *   Some expression in string form, like foo.bar, 123, or true.
+	 * @param  {obj} data
+	 *   The context data where we can featch any data to evaluate this expression.
+	 * 
+	 * @return {mixed|Failure}
+	 *   The normalized value, or failure.
+	 */
+	function normalizeExpression(exp, data) {
+
+		var regex_path = /^([a-z][_\-a-z0-9]+)\.(([a-z][_\-a-z0-9]+)\.?)+$/i,
+		    regex_num = /^[\-0-9]+[.]?[0-9]*$/;
+
+		if (typeof exp === 'string') {
+			exp = exp.trim();
+
+			if (exp == 'true') { exp = true; }
+			else if (exp == 'false') { exp = false; }
+			else if (regex_num.test(exp)) { exp = Number(exp); }
+			else if (typeof data !== 'object') { console.warn('Expression appears to depend upon data, Expected as object, but found', typeof data, '.'); }
+			else if (obj_path = exp.match(regex_path)) { exp = getObjectPath(exp, data); }
+			else if (data[exp]) { exp = data[exp]; }
+			else { 
+				console.warn('Expression ' + exp + ' could not be evaluated.');
+				exp = BISTRO_FAILURE;
+			}
+		}
+
+		return exp;
+	}
+
+
 	return {
 		splitOnce: splitOnce,
 		firstOccuring: firstOccuring,
-		getObjectPath: getObjectPath
+		getObjectPath: getObjectPath,
+		normalizeExpression: normalizeExpression
 	};
 })();
 
 module.exports = {
 	firstOccuring: server_utils.firstOccuring,
 	splitOnce: server_utils.splitOnce,
-	getObjectPath: server_utils.getObjectPath
+	getObjectPath: server_utils.getObjectPath,
+	normalizeExpression: server_utils.normalizeExpression
 };
