@@ -157,6 +157,38 @@ var server_utils = (function utils() {
 
 
 	/**
+	 * Unwrap a string wrapped by a delimeter.
+	 *
+	 * E.G 
+	 *    var str = "'hiMom'";
+	 *    calling: unwrap(str, ['"']);
+	 *    returns: hiMom
+	 * 
+	 * @param  {[type]} str
+	 *   A string, possibally wrapped by delimeters. 
+	 * @param  {str|array(str)} delimeters
+	 *   One or more delimeters to search for. 
+	 * 
+	 * @return {str}
+	 *   The string, unwrapped by the outtermost wrapping delimeter, if found.
+	 */
+	function unwrap(str, delimeters) {
+		if (typeof delimeters === 'string') { delimeters = [delimeters]; }
+
+		str = str.trim();
+
+		for (var i = 0; i < delimeters.length; i++) {
+			if (str.substring(0,1) == delimeters[i]
+				&& str.substring(-1,1) == delimeters[i]) {
+				return str.substring(1, str.length-1);
+			}
+		}
+
+		return str;
+	}
+
+
+	/**
 	 * Given an exression in a template passed as part of a reserve word,
 	 * normalize the value, so it maybe be properly evaluated.
 	 * 
@@ -171,7 +203,8 @@ var server_utils = (function utils() {
 	function normalizeExpression(exp, data) {
 
 		var regex_path = /^([a-z][_\-a-z0-9]+)\.(([a-z][_\-a-z0-9]+)\.?)+$/i,
-		    regex_num = /^[\-0-9]+[.]?[0-9]*$/;
+		    regex_num = /^[\-0-9]+[.]?[0-9]*$/,
+		    regex_literal = /^[\'\"]([\'\"\\_\-a-z0-9]+)[\'\"]$/i;
 
 		if (typeof exp === 'string') {
 			exp = exp.trim();
@@ -179,11 +212,12 @@ var server_utils = (function utils() {
 			if (exp == 'true') { exp = true; }
 			else if (exp == 'false') { exp = false; }
 			else if (regex_num.test(exp)) { exp = Number(exp); }
+			else if (regex_literal.test(exp)) { exp = unwrap(exp, ["'", '"']); }
 			else if (typeof data !== 'object') { console.warn('Expression appears to depend upon data, Expected as object, but found', typeof data, '.'); }
 			else if (obj_path = exp.match(regex_path)) { exp = getObjectPath(exp, data); }
 			else if (data[exp]) { exp = data[exp]; }
 			else { 
-				console.warn('Expression ' + exp + ' could not be evaluated.');
+				console.warn('Expression "' + exp + '"" could not be evaluated.');
 				exp = BISTRO_FAILURE;
 			}
 		}

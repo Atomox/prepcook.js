@@ -152,15 +152,6 @@ var lang = (function languageFactory() {
 	 */
 	function evalConditional(type, expression, data) {
 
-		/**
-		   @TODO
-
-		     Does not work for #unless
-
-
-
-		 */
-
 		try {
 			// Trim whitespace before passing the regex.
 			expression = expression.trim();
@@ -171,7 +162,7 @@ var lang = (function languageFactory() {
 				return (singleExp && singleExp !== BISTRO_FAILURE) ? true : false;
 			}
 			// Otherwise, we're dealing with something more complex.
-			else if (exp = expression.match(/^([a-z0-9_\-\.]+)[\s]?(>=|<|>|==|!=)[\s]?([a-z0-9_\-\.]+)$/i)) {
+			else if (exp = expression.match(/^([\"\'a-z0-9_\-\.]+)[\s]?(>=|<|>|==|!=)[\s]?([a-z0-9_\-\.\'\"]+)$/i)) {
 				if (Array.isArray(exp) === false) {
 					throw new Error('Expression does not eval.');
 				}
@@ -181,7 +172,7 @@ var lang = (function languageFactory() {
 						right = parseutil.normalizeExpression(exp[3], data); 
 
 					if (left === BISTRO_FAILURE || right === BISTRO_FAILURE) {
-						console.warn('One or more vars in expression had errors.', left, right);
+						console.warn('One or more vars in expression "' + expression + '" had errors.', left, right);
 
 						if (left === BISTRO_FAILURE) { left = null; }
 						if (right === BISTRO_FAILURE) { right = null; }
