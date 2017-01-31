@@ -1,6 +1,7 @@
 #prepCook.js
 
-**A simple templating engine built in Node.js developed for [Bistro.js](https://github.com/Atomox/bistro.js).**
+**A simple, promise-based templating engine built in Node.js. 
+Developed for [Bistro.js](https://github.com/Atomox/bistro.js).**
 
 
 Templating based on concepts from handlebars.js and angular.js.
@@ -39,6 +40,7 @@ And run it against a template, with a context:
 ```
 	{{ #if people }} I'm a person, and totally exist. {{ \if }}
 	{{ #if person.age >= 2 }} I'm at least 2. {{ \if }}
+	{{ #unless person >= 21 }} I'm not 21 yet! {{ \unless }}
 
 ```
 
