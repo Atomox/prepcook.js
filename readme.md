@@ -92,6 +92,8 @@ Output a variable in JSON format.
 
 ### Just pass in a context:
 
+Variables get avaluated based upon whatever contect object you pass in.  You can only pass one, but you can traverse it yourself. Some functions, like `#each`, traverse them for you.
+
 ```
 {
 	message: {
@@ -111,6 +113,10 @@ Output a variable in JSON format.
 	}
 }
 ```
+
+Reference like follows:
+
+`[foo.bar.baz]` outputs 123. `#each people` exposes [first] inside of it.
 
 
 #### Valid template commands:
