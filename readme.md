@@ -23,6 +23,16 @@ And run it against a template, with a context:
 
 ```var output = prepcook.processTemplate(data, template);```
 
+`processTemplate` returns a [PROMISE](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise), so it currently is for back-end, ES6 compatable environments. `output` should be "then'ed", where you'll get the actual data, like so:
+
+```
+	output.then(function (the_template) {
+			// Do something with your template here!
+		})
+		.catch(function (err){
+			// Something went wrong!
+		});
+```
 
 ### Simple code, with formatting:
 
