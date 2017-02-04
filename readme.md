@@ -66,14 +66,21 @@ And run it against a template, with a context:
 	[variable_name|filter:arg1:arg2:arg3]
 ```
 
-``` [var|currency:USD] ```
+``` 
+	[var|currency:USD]
+```
+
 Output a variable, formatted in US Dollars.
 
-``` ['I am a String'|lowercase] ```
+```
+	['I am a String'|lowercase]
+```
 Output a string in all lowercase. Also try `[string|uppercase]`.
 
 
-``` [var|JSON] ```
+```
+	[var|JSON]
+```
 Output a variable in JSON format.
 
 ### Just pass in a context:
