@@ -204,7 +204,7 @@ var server_utils = (function utils() {
 
 		var regex_path = /^([a-z][_\-a-z0-9]+)\.(([a-z][_\-a-z0-9]+)\.?)+$/i,
 		    regex_num = /^[\-0-9]+[.]?[0-9]*$/,
-		    regex_literal = /^[\'\"]([\'\"\\_\-a-z0-9]+)[\'\"]$/i;
+		    regex_literal = /^[\'\"](.+)[\'\"]$/i;
 
 		if (typeof exp === 'string') {
 			exp = exp.trim();
@@ -217,7 +217,7 @@ var server_utils = (function utils() {
 			else if (obj_path = exp.match(regex_path)) { exp = getObjectPath(exp, data); }
 			else if (data[exp]) { exp = data[exp]; }
 			else { 
-				console.warn('Expression "' + exp + '"" could not be evaluated.');
+				console.warn('Expression "' + exp + '" could not be evaluated.');
 				exp = BISTRO_FAILURE;
 			}
 		}

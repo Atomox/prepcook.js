@@ -67,6 +67,50 @@ var prepcookFilter = (function FilterFactory() {
 	 */
 	function filterDate (date, format) {
 
+		try {
+			if (typeof date !== 'string') {
+				throw new Error('Date passed to filterDate expected string, ' + typeof date + ' given.');
+			}
+			var d = new Date(date);	
+
+	
+
+			
+			/**
+			   
+
+			   @TODO
+
+
+			 */
+
+
+
+
+			// Allowed formats: 'Y-M-D'...
+			date = d;
+		}
+		catch (error) {
+			console.warn('Error formatting date. ', err);
+			return BISTRO_FAILURE;
+		}
+
+		return date;
+	}
+
+
+	/**
+	 * Filter a list of data by a [filter].
+	 * 
+	 * @param  {mixed} data
+	 *   Some data to filter.
+	 * @param  {string} filter
+	 *   A filter command to apply to our data.
+	 *   
+	 * @return {mixed}
+	 *   Our data, with only the elements not removed by the applied [filter].
+	 */
+	function filterFilter (data, filter) {
 
 		/**
 		   
@@ -76,7 +120,43 @@ var prepcookFilter = (function FilterFactory() {
 
 		 */
 
-		return date;
+		return data;
+	}
+
+
+	/**
+	 * Filter a string to lowercase
+	 * 
+	 * @param  {string} data
+	 *   A string to convert to lowercase.
+	 *   
+	 * @return {string}
+	 *   A string, lowercased. If passed type was not a string, it is returned as-is.
+	 */
+	function filterLowercase (data) {
+		if (typeof data !== 'string') {
+			console.warn('Lowercase filter expects string. ' + typeof data + ' given.');
+			return data;
+		}
+		return data.toLowerCase();
+	}
+
+
+	/**
+	 * Filter a string to uppercase
+	 * 
+	 * @param  {string} data
+	 *   A string to convert to uppercase.
+	 *   
+	 * @return {string}
+	 *   A string, uppercased. If passed type was not a string, it is returned as-is.
+	 */
+	function filterUppercase (data) {
+		if (typeof data !== 'string') {
+			console.warn('Uppercase filter expects string. ' + typeof data + ' given.');
+			return data;
+		}
+		return data.toUpperCase();
 	}
 
 
@@ -97,12 +177,18 @@ var prepcookFilter = (function FilterFactory() {
 	return {
 		currency: filterCurrency,
 		date: filterDate,
-		json: filterToJSON
+		json: filterToJSON,
+		filter: filterFilter,
+		uppercase: filterUppercase,
+		lowercase: filterLowercase
 	};
 })();
 
 module.exports = {
 	currency: prepcookFilter.currency,
 	date: prepcookFilter.date,
-	json: prepcookFilter.json
+	json: prepcookFilter.json,
+	filter: prepcookFilter.filter,
+	uppercase: prepcookFilter.uppercase,
+	lowercase: prepcookFilter.lowercase
 };
