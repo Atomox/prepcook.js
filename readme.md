@@ -60,12 +60,17 @@ And run it against a template, with a context:
 ```
 	<ul>
 		{{ #each people }}
-			{{ #if first != last }}
-				<li> {{ [first|string] [last|string] }} </li>
-			{{ /if
-		/each }}
+				<li> 
+					Here's people.first, and people.last 
+					{{ [first|string] [last|string] }}
+				</li> 
+		{{ /each }}
 	</ul>
+```
 
+Or nest them.
+
+```
 	{{ #each foo }}
 		{{ #each bar }}
 			<li> {{ [baz|string] }} </li>
