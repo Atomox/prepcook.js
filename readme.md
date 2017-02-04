@@ -34,6 +34,8 @@ And run it against a template, with a context:
 		});
 ```
 
+## The Language
+
 ### Simple code, with formatting:
 
 
