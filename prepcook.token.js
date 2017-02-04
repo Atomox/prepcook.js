@@ -6,7 +6,8 @@
  *   and replaces them with their value from the paseed context.
  */
 
-var parseutil = parseutil || require('./includes/prepcook.utils');
+var parseutil = parseutil || require('./includes/prepcook.utils'),
+	filter = filter || require('./prepcook.filter');
 
 const BISTRO_FAILURE = BISTRO_FAILURE || '__FAILURE';
 
@@ -137,6 +138,26 @@ var prepcook_tokenizer = (function tokenProcessFactory() {
 
 					 */
 					break;
+
+				default:
+
+					console.log('Default: ' + params[1] + " " + params[0]);
+					var var_args = params[1].split(':'),
+						var_value;
+					params[1] = var_args[0];
+					var_args.splice(0, 1);
+
+					if (typeof filter[params[1]] == 'function') {
+						params[0] = parseutil.normalizeExpression(params[0], vars);
+						var_value = (params[0] !== BISTRO_FAILURE) ? filter[params[1]](params[0], ...var_args) : BISTRO_FAILURE;
+					}
+
+					if (var_value !== BISTRO_FAILURE) {
+						maps_to = var_value;
+					}
+					else {
+						throw new Error('Bad template variable reference: ' + params[0]);
+					}
 			}
 		}
 

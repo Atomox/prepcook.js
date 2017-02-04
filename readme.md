@@ -54,17 +54,28 @@ And run it against a template, with a context:
 		/each }}
 	</ul>
 
-	#each foo }}
+	{{ #each foo }}
 		{{ #each bar }}
 			<li> {{ [baz|string] }} </li>
 		{{ /each
 	/each }}
 ```
 
+### Angular-style Filters:
+```
+	[variable_name|filter:arg1:arg2:arg3]
+```
+
+#### [var|currency:USD]
+Output a variable, formatted in US Dollars.
+
+#### [var|JSON]
+Output a variable in JSON format.
 
 ### Just pass in a context:
 
-```{
+```
+{
 	message: {
 		title: "Hi Dad Soup"
 	},
@@ -80,7 +91,8 @@ And run it against a template, with a context:
 			baz: 123
 		}
 	}
-}```
+}
+```
 
 
 #### Valid template commands:
