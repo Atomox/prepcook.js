@@ -62,9 +62,16 @@ And run it against a template, with a context:
 ```
 
 ### Angular-style Filters:
+
+Inspired by Angular, you can apply filters to your variables or literals before outputting them. The syntax is as follows:
+
 ```
 	[variable_name|filter:arg1:arg2:arg3]
 ```
+
+Apply `lowercase` or `uppercase` transformations, format them as a `currency`, convert data to `json`, or all sorts of other things.
+You can even add your own!
+
 
 ``` 
 	[var|currency:USD]
