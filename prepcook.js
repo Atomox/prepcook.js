@@ -155,7 +155,7 @@ var chef = (function chefFactory() {
 	 * @return {string}
 	 *    The resolved tree, including resolved commands and tokens.
 	 */
-	function traverseParseTree (node, vars, level) {
+	function traverseParseTree (node, vars, level, options) {
  
         if (typeof node === 'undefined') {
         	console.warn('Cannot resolve undefined parse tree.');
@@ -165,22 +165,53 @@ var chef = (function chefFactory() {
         //     node instanceof
         
         if (!level) { level = 0; }
+        options = options || {
+        	enable_linked_conditional: false
+        }
         var children = node.children,
             offset = Array(level+1).join(' '),
             result = '',
             visit_children = true;
 
         // Check the current node's data, and apply it's data, if applicable.
-        if (!node.data || !node.data.data) {  
+        if (!node.data) {
         	// Do nothing.
+        	options.enable_linked_conditional = false;
         }
         // Do we show the data for this node, or is it a decider for how to show it's children?
         // Constandants and expressions get evaluated.
         else if (lang.isConditional(node.data.type) === true) {
         	visit_children = lang.resolveConditional(node.data.type, node.data.data, vars);
+
+        	if (!visit_children) {
+        		options.enable_linked_conditional = true;	
+        	}
+        	else {
+        		options.enable_linked_conditional = false;
+        	}
+        }
+        else if (lang.isLinkedConditional(node.data.type) === true) {
+
+        	if (options.enable_linked_conditional === true) {
+	        	visit_children = lang.resolveConditional(node.data.type, node.data.data, vars);
+
+	        	// If conditional failed, allow a linked conditional to fire on the next iteration.
+	        	options.enable_linked_conditional = (visit_children === false) ? true : false;
+			}
         }
         else {
+        	// Expressions shouldn't have children.
+        	visit_children = false;
+
         	result += lang.resolveContent(node.data.type, node.data.data, vars);
+
+        	// White space shouldn't change state.
+	        if (node.data.type == 'constant' && node.data.data.trim() == '') {
+	        	// Do not change state for whitespace.
+	        }
+	        else {
+	        	options.enable_linked_conditional = false;	
+	        }
         }
 
         if (visit_children === true) {
@@ -190,7 +221,9 @@ var chef = (function chefFactory() {
 	        		for (var i = 0; i < vars[node.data.data].length; i++) {
 				        for (var j = 0; j < children.length; j++) {
 				            if (children[j]) {
-				            	result += traverseParseTree(children[j], vars[node.data.data][i], (level+1));
+				            	var temp_result = traverseParseTree(children[j], vars[node.data.data][i], (level+1), options);
+				            	result += temp_result.result;
+				            	options = temp_result.options;
 				            }
 				        }        			
 	        		}
@@ -200,13 +233,26 @@ var chef = (function chefFactory() {
 	        else {
 		        for (var j = 0; j < children.length; j++) {
 		            if (children[j]) {
-		               result += traverseParseTree(children[j], vars, (level+1));
+		                var temp_result = traverseParseTree(children[j], vars, (level+1), options);
+		            	result += temp_result.result;
+		            	options = temp_result.options;
 		            }
 		        }
 	        }
+
+	        // We will never be in this block if enable_linked_conditional was still TRUE,
+	        // so protect this state in children from their parents.
+	        options.enable_linked_conditional = false;
 	    }
 
-		return result;
+	    if (level === 0) {
+	    	return result;
+	    }
+
+		return {
+			result: result,
+			options: options
+		};
 	}
 
 

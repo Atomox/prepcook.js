@@ -22,6 +22,9 @@ var lang = (function languageFactory() {
 		'#if',
 		'/if',
 		'#else',
+		'/else',
+		'#elseif',
+		'/elseif',
 		'#unless',
 		'/unless'
 	];
@@ -43,6 +46,21 @@ var lang = (function languageFactory() {
 					'all'
 				]
 			},
+		'#else': {
+				type: 'block',
+				behavior: 'linked-conditional',
+				start: '#else',
+				end: "/else",
+		},
+		'#elseif': {
+				type: 'block',
+				behavior: 'linked-conditional',
+				start: '#elseif',
+				end: '/elseif',
+				rules: [
+					'all'
+				]
+		},
 		'#unless': {
 				type: 'block',
 				behavior: 'conditional',
@@ -81,6 +99,14 @@ var lang = (function languageFactory() {
 
 	function isConditional (type) {
 		return (getWordDefinition(type).behavior == 'conditional') ? true : false;
+	}
+
+
+	function isLinkedConditional (type) {
+		if (getWordDefinition(type).behavior == 'linked-conditional') {
+			console.log(type, ' is linked conditional.');
+		}
+		return (getWordDefinition(type).behavior == 'linked-conditional') ? true : false;
 	}
 
 
@@ -153,8 +179,12 @@ var lang = (function languageFactory() {
 	function evalConditional(type, expression, data) {
 
 		try {
+			console.log(type + '...');
+			// Since else has no expression, always return true right away.
+			if (type == '#else') { return true; }
+
 			// Trim whitespace before passing the regex.
-			expression = expression.trim();
+			expression = (typeof expression === 'string') ? expression.trim() : expression;
 
 			// Check for a single variable expression referencing the current base level of data.
 			if (/^([a-z0-9_\-\.]+)+$/i.test(expression)) {
@@ -226,6 +256,7 @@ var lang = (function languageFactory() {
 		getWord: getWordDefinition,
 		terminusMatch: terminusMatch,
 		isConditional: isConditional,
+		isLinkedConditional: isLinkedConditional,
 		isIterator: isIterator,
 		resolveContent: resolveContent,
 		resolveConditional: resolveConditional
@@ -237,6 +268,7 @@ module.exports = {
 	getWord: lang.getWord,
 	terminusMatch: lang.terminusMatch,
 	isConditional: lang.isConditional,
+	isLinkedConditional: lang.isLinkedConditional,
 	isIterator: lang.isIterator,
 	resolveContent: lang.resolveContent,
 	resolveConditional: lang.resolveConditional

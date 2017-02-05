@@ -141,7 +141,6 @@ var prepcook_tokenizer = (function tokenProcessFactory() {
 
 				default:
 
-					console.log('Default: ' + params[1] + " " + params[0]);
 					var var_args = params[1].split(':'),
 						var_value;
 					params[1] = var_args[0];
@@ -159,8 +158,11 @@ var prepcook_tokenizer = (function tokenProcessFactory() {
 						throw new Error('Bad template variable reference: ' + params[0]);
 					}
 			}
+
+			return maps_to;
 		}
 
+		// Eval any params or expressions as normal, if there were no filters.
 		return parseutil.normalizeExpression(params[0], vars);
 	}
 
