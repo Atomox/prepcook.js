@@ -50,6 +50,16 @@ Make sure to have [bistro.tree.js](https://github.com/Atomox/bistro.js.tree/blob
 	{{ #unless person >= 21 }} I'm not 21 yet! {{ \unless }}
 
 ```
+Or chain them, as you would in any language.
+```
+	{{ #if people }}
+		I'm a group of people.
+	{{ /if #elseif person }}
+		I'm one person.
+	{{ /elseif #else }}
+		A girl has no name.
+	{{ /else }}
+```
 
 ### Loops
 ```
