@@ -15,14 +15,9 @@ Make sure to have [bistro.tree.js](https://github.com/Atomox/bistro.js.tree/blob
 ## Using it is simple.
 
 1. Just require the package's module:
-
 ```var prepcook = prepcook || require ('prepcook');```
-
-
 2. And run it against a template, with a context:
-
 ```var output = prepcook.processTemplate(data, template);```
-
 3. `processTemplate` returns a [PROMISE](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise). (requires ES6 compatable environments) `output` should be "then'ed", where you'll get the actual data, like so:
 
 ```
