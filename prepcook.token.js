@@ -161,7 +161,7 @@ var prepcook_tokenizer = (function tokenProcessFactory() {
 			}
 		}
 
-		return maps_to;
+		return parseutil.normalizeExpression(params[0], vars);
 	}
 
 	return {

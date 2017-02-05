@@ -41,10 +41,10 @@ And run it against a template, with a context:
 
 ```
 	<h1>
-		{{ [message.title|string] }}
+		{{ [message.title] }}
 	</h1>
 	<p>	
-		{{ [body|text] }}
+		{{ [body] }}
 	</p>
 ```
 
@@ -62,7 +62,7 @@ And run it against a template, with a context:
 		{{ #each people }}
 				<li> 
 					Here's people.first, and people.last 
-					{{ [first|string] [last|string] }}
+					{{ [first] [last] }}
 				</li> 
 		{{ /each }}
 	</ul>
@@ -73,14 +73,14 @@ Or nest them.
 ```
 	{{ #each foo }}
 		{{ #each bar }}
-			<li> {{ [baz|string] }} </li>
+			<li> {{ [baz] }} </li>
 		{{ /each
 	/each }}
 ```
 
 ### Angular-style Filters:
 
-Inspired by Angular, you can apply filters to your variables or literals before outputting them. The syntax is as follows:
+Inspired by Angular, you can apply filters to your variables or literals before outputting them. Just add a pipe `|` to the end of your variable:
 
 ```
 	[variable_name|filter:arg1:arg2:arg3]
