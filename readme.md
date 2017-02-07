@@ -54,9 +54,9 @@ Or chain them, as you would in any language.
 ```
 	{{ #if people }}
 		I'm a group of people.
-	{{ /if #elseif person }}
+	{{ #elif person }}
 		I'm one person.
-	{{ /elseif #else }}
+	{{ #else }}
 		A girl has no name.
 	{{ /else }}
 ```
