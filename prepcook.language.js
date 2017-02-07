@@ -23,8 +23,8 @@ var lang = (function languageFactory() {
 		'/if',
 		'#else',
 		'/else',
-		'#elseif',
-		'/elseif',
+		'#elif',
+		'/elif',
 		'#unless',
 		'/unless'
 	];
@@ -42,6 +42,10 @@ var lang = (function languageFactory() {
 				behavior: 'conditional',
 				start: '#if',
 				end: '/if',
+				peers: [
+					'#else',
+					'#elif'
+				],
 				rules: [ 
 					'all'
 				]
@@ -52,11 +56,15 @@ var lang = (function languageFactory() {
 				start: '#else',
 				end: "/else",
 		},
-		'#elseif': {
+		'#elif': {
 				type: 'block',
 				behavior: 'linked-conditional',
-				start: '#elseif',
-				end: '/elseif',
+				start: '#elif',
+				end: '/elif',
+				peers: [
+					'#else',
+					'#elif'
+				],
 				rules: [
 					'all'
 				]
@@ -88,7 +96,8 @@ var lang = (function languageFactory() {
 				behavior: dictionary[my_word].behavior,
 				start: dictionary[my_word].start,
 				end: dictionary[my_word].end,
-				rules: dictionary[my_word].rules
+				rules: dictionary[my_word].rules,
+				peers: (typeof dictionary[my_word].peers !== 'undefined') ? dictionary[my_word].peers : []
 			};
 
 			return result;

@@ -76,13 +76,23 @@ var chef = (function chefFactory() {
 				var command = parseReserveWord(segment);
 
 				if (typeof command.word !== 'undefined' && typeof command.type !== 'undefined') {
-					var my_leaf = null;
 
-					switch(command.type) {
+					var my_leaf = null,
+						my_type = command.type,
+						parent_def = (typeof parents.peek().data !== 'undefined' && parents.peek().data !== null) 
+							? lang.getWord(parents.peek().data.type) 
+							: false;
+
+					// If the parent has peers, and command.type is in the peer array, then this doubles as a block_terminus.
+					if (parent_def && typeof parent_def.peers === 'object' && parent_def.peers.indexOf(command.word) >= 0) {
+						my_type = 'block_terminus';
+					}
+
+					switch(my_type) {
 						case 'block':
 							// Add the block_word to the tree, and the parent to the stack.
 							my_leaf = tree.add(command.word, parents.peek().id, parents.peek(), command.segment);
-							parents.push(my_leaf);							
+							parents.push(my_leaf);						
 							break;
 					
 						case 'block_terminus':
@@ -197,6 +207,9 @@ var chef = (function chefFactory() {
 
 	        	// If conditional failed, allow a linked conditional to fire on the next iteration.
 	        	options.enable_linked_conditional = (visit_children === false) ? true : false;
+			}
+			else {
+				visit_children = false;
 			}
         }
         else {
