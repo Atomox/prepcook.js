@@ -4,7 +4,7 @@
   "description": "A small template endgine made for bistro.js.",
   "main": "prepcook.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha",
     "start": "node prepcook.js"
   },
   "repository": {
@@ -22,5 +22,9 @@
   "homepage": "https://github.com/Atomox/bistro.js#readme",
   "dependencies": {
     "bistro.js.tree": "^0.0.0"
+  },
+  "directories": {
+    "includes": "includes",
+    "test": "test"
   }
 }
