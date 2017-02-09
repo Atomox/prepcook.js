@@ -139,3 +139,8 @@ Variables get evaluated based upon whatever context object you pass in.  You can
 Reference like follows:
 
 `[foo.bar.baz]` outputs 123. `#each people` exposes [first] inside of it.
+
+
+## Tests in Mocha
+
+We use Mocha to run tests to make sure the components are working together as expected. Currently, you'll need to install mocha yourself, then run: `npm test` in the prepcook.js directory.

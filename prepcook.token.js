@@ -73,7 +73,7 @@ var prepcook_tokenizer = (function tokenProcessFactory() {
 					}
 				}
 
-				left += tmp_l;
+				left += tmp_l.trim();
 				right = tmp_r;
 
 				// If we found a start, right should be a block code segment.

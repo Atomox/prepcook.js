@@ -43,9 +43,10 @@ describe('Parse Utils', function() {
 			assert.equal(data.bar.baz, parseutil.normalizeExpression(templates.object_notation, data));
 		});
 
+
 		// Errors
 		it ('Should error if a variable was passed without any data.', function() {
-			assert.equal(BISTRO_FAILURE, parseutil.normalizeExpression(templates.object_notation));
+			assert.equal(BISTRO_FAILURE, parseutil.normalizeExpression(templates.object_notation, null));
 		});
 
 
@@ -67,10 +68,12 @@ describe('Parse Utils', function() {
 		/**
 		   @TODO
 		 */
-		it ('Should not return #else if #elseif comes first.', function() {
+		it ('Should not return #else if #elseif comes first.'); 
+/**
+		, function() {
 			assert.equal('#elseif', parseutil.firstOccuring(['#else', '#elseif', '#if'], 'hello #elseif world #else'));
 		});
-
+*/
 		it ('Should return nothing when no match is found.');
 	});
 

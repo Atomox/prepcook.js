@@ -125,7 +125,7 @@ var server_utils = (function utils() {
 	function getObjectPath(needle, haystack) {
 		
 		try {
-			if (typeof haystack !== 'object') {
+			if (typeof haystack !== 'object' || haystack === null) {
 				throw new Error('Type object expected for haystack.');
 			}
 
@@ -213,7 +213,10 @@ var server_utils = (function utils() {
 			else if (exp == 'false') { exp = false; }
 			else if (regex_num.test(exp)) { exp = Number(exp); }
 			else if (regex_literal.test(exp)) { exp = unwrap(exp, ["'", '"']); }
-			else if (typeof data !== 'object' || data === null) { console.warn('Expression appears to depend upon data, Expected as object, but found', typeof data, '.'); }
+			else if (typeof data !== 'object' || data === null) { 
+				console.warn('Expression appears to depend upon data, Expected as object, but found', typeof data, '.'); 
+				exp = BISTRO_FAILURE;
+			}
 			else if (obj_path = exp.match(regex_path)) { exp = getObjectPath(exp, data); }
 			else if (data[exp]) { exp = data[exp]; }
 			else { 
