@@ -29,7 +29,7 @@ var chef = (function chefFactory() {
 				var parse_tree = parseTree(template);
 
 				// Debugger
-//				parse_tree.dump();
+				parse_tree.dump();
 
 				var parsed_tpl = resolveParseTree(parse_tree, data);
 
@@ -49,7 +49,7 @@ var chef = (function chefFactory() {
 	function parseTree (template) {
 		
 		var right = template,
-			tree = parsetree,
+			tree = new parsetree.ParseTree(),
 			parents = new stack.Stack();
 
 			// Push the root element onto the array.

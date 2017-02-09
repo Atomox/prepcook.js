@@ -3,9 +3,15 @@ var tree = tree || require('bistro.js.tree');
 var parseTree = (function pathFactory() {
 
     // Foreach path, log a callback as data.
-    var myTree = new tree.Tree('root', null),
-    myRoot = myTree.getRoot('root');
+    this.myTree = null;
+    this.myRoot = null;
 
+     
+    // Initialize our Stack.
+    function ParseTree(data) {
+        this.myTree = new tree.Tree('root', null);
+        this.myRoot = this.myTree.getRoot('root');
+    }
 
     /**
      * Add a template snipit to the internal parse tree. 
@@ -22,26 +28,26 @@ var parseTree = (function pathFactory() {
      * @return {Node}
      *   The newly added node.
      */
-    function add_leaf (type, parentId, parent, data) {
+    ParseTree.prototype.add = function getLeaf (type, parentId, parent, data) {
 
         console.log(' -> Adding Leaf: ' + type + ' to parent: ');
         
         try {
             // Attempt to get the parent node, if not passed, using either the ID,
             // or defaulting to the root.
-            if (parent == null && parendId == null) { parentId = myTree.getRoot(); }
-            if (parent == null && parentId) { parent = myTree.getNode(parentId); }
+            if (parent == null && parendId == null) { parentId = this.myTree.getRoot(); }
+            if (parent == null && parentId) { parent = this.myTree.getNode(parentId); }
             if (!parent) { throw new Error('Cannot load parent node, or find root. Make sure tree was initialized.'); }
 
             // Generate unique ID based upon a node type.
-            var my_uniqueid = myTree.getNextUniqueId(type);
+            var my_uniqueid = this.myTree.getNextUniqueId(type);
 
             var my_node_data = {
                 type: type,
                 data: data
             }
 
-            var my_node = myTree.add(my_uniqueid, my_node_data, parent);
+            var my_node = this.myTree.add(my_uniqueid, my_node_data, parent);
         }
         catch (e) {
             console.warn('ParseTree.add_leaf(): ' + e);
@@ -52,20 +58,15 @@ var parseTree = (function pathFactory() {
     }
 
 
-    function dump() { myTree.dump(); }
-    function get_root() { return myRoot; }
+    ParseTree.prototype.dump = function dump() { this.myTree.dump(); }
+    ParseTree.prototype.root = function get_root() { return this.myRoot; }
 
     return {
-        tree: myTree,
-        add_leaf: add_leaf,
-        get_root: get_root,
-        dump: dump
+        ParseTree: ParseTree
     };
 })();
 
 
 module.exports = {
-    add: parseTree.add_leaf,
-    root: parseTree.get_root,
-    dump: parseTree.dump
+    ParseTree: parseTree.ParseTree
 };

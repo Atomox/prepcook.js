@@ -32,63 +32,66 @@ describe('Prepcook Module', function() {
 		it ('Should error if a template was not a string.');
 
 		it ('Should parse plain templates.', function() {
-			return prepcook.processTemplate(templates.basic, {})
+			return prepcook.processTemplate({}, templates.basic)
 				.then(function(tpl) { 
 					assert.equal(tpl, templates.basic); });
 		});
 
-
 		// Simple Templates
 
 		it ('Should parse simple templates.', function() {
-			return prepcook.processTemplate(templates.literal, {})
+			return prepcook.processTemplate({}, templates.literal)
 				.then(function(tpl) { 
-					assert.equal("<html><body>Hello World</body</html>", templates.literal); });
+					assert.equal("<html><body>Hello World</body</html>", tpl); });
 		});
+
+		// Single Response
+		it ('Should return the same data on every request.');
+
 		
 
 		// Conditionals
 
 		it ('Should parse simple conditionals, and display them if true.', function() {
-			return prepcook.processTemplate(templates.if_true, {})
+			return prepcook.processTemplate({}, templates.if_true)
 				.then(function(tpl) { 
-					assert.equal("This is True", templates.if_true); });
+					assert.equal("This is True", tpl); });
 		});
 
 		it ('Should parse simple conditionals, and not display them if false.', function() {
-			return prepcook.processTemplate(templates.if_false, {})
+			return prepcook.processTemplate([], templates.if_false)
 				.then(function(tpl) { 
-					assert.equal("", templates.if_false); });
+					assert.equal("", tpl); });
 		});
 
 		it ('Should parse linked conditionals, and not display ELSE when if true.', function() {
-			return prepcook.processTemplate(templates.if_else_true, {})
+			return prepcook.processTemplate({}, templates.if_else_true)
 				.then(function(tpl) { 
-					assert.equal("This is True", templates.if_else_true); });
+					assert.equal("This is True", tpl); });
 		});
 
 		it ('Should parse linked conditionals, and not display ELSE instead of IF when false.', function() {
-			return prepcook.processTemplate(templates.if_else_false, {})
+			return prepcook.processTemplate({}, templates.if_else_false)
 				.then(function(tpl) { 
-					assert.equal("NOT", templates.if_else_false); });
+					assert.equal("NOT", tpl); });
 		});
 
 		it ('Should parse multi-linked conditionals, and not display ELIF or ELSE when IF is true.', function() {
-			return prepcook.processTemplate(templates.if_elif_else, {a: true, b: true, c: true})
+			return prepcook.processTemplate({a: true, b: true, c: true}, templates.if_elif_else)
 				.then(function(tpl) { 
-					assert.equal("A", templates.if_elif_else); });
+					assert.equal("A", tpl); });
 		});
 
 		it ('Should parse multi-linked conditionals, and not display IF or ELSE when IF is false, and elif is true.', function() {
-			return prepcook.processTemplate(templates.if_elif_else, {a: false, b: true, c: true})
+			return prepcook.processTemplate({a: false, b: true, c: true}, templates.if_elif_else)
 				.then(function(tpl) { 
-					assert.equal("B", templates.if_elif_else); });
+					assert.equal("B", tpl); });
 		});
 
 		it ('Should parse multi-linked conditionals, and not display IF or ELIF when they are false.', function() {
-			return prepcook.processTemplate(templates.if_elif_else, {a: false, b: false, c: true})
+			return prepcook.processTemplate({a: false, b: false, c: true}, templates.if_elif_else)
 				.then(function(tpl) { 
-					assert.equal("C", templates.if_elif_else); });
+					assert.equal("C", tpl); });
 		});
 		
 	});
