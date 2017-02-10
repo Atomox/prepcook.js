@@ -144,3 +144,10 @@ Reference like follows:
 ## Tests in Mocha
 
 We use Mocha to run tests to make sure the components are working together as expected. Currently, you'll need to install mocha yourself, then run: `npm test` in the prepcook.js directory.
+
+
+## TODO
+1. `#each` should be able to view data outside of it's scope, using `../`
+2. We should be able to reference sub-templates inside of our template.
+3. We should split up rendering sub-trees asynchroniously.
+4. Performance check.
