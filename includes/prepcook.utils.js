@@ -204,7 +204,7 @@ var server_utils = (function utils() {
 
 		var regex_path = /^([a-z][_\-a-z0-9]+)\.(([a-z][_\-a-z0-9]+)\.?)+$/i,
 		    regex_num = /^[\-0-9]+[.]?[0-9]*$/,
-		    regex_literal = /^[\'\"](.+)[\'\"]$/i;
+		    regex_literal = /^[\'\"](.*)[\'\"]$/i;
 
 		if (typeof exp === 'string') {
 			exp = exp.trim();

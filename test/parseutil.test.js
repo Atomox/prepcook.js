@@ -8,9 +8,14 @@ describe('Parse Utils', function() {
 		var templates = {
 				boolean: 'true',
 				number: 1234,
+				number_neg: -23,
+				number_invalid: '23ab',
 				decimal: 1234.56,
 				literal: '"Hello World"',
 				literal_mixedcase: "'123 Hello Wor789ld'",
+				literal_empty: '""',
+				literal_number: '"12345"',
+				literal_escaped: '"123\"abc"',
 				variable: 'foo',
 				object_notation: 'bar.baz'
 			}, 
@@ -19,7 +24,6 @@ describe('Parse Utils', function() {
 				bar: {baz: 'hi there'}
 			};
 
-
 		// Expected behavior.
 		it ('Should identify a boolean.', function() {
 			assert.equal(true, parseutil.normalizeExpression(templates.boolean, data));
@@ -27,6 +31,13 @@ describe('Parse Utils', function() {
 		it ('Should identify an integer as a number.', function() {
 			assert.equal(templates.number, parseutil.normalizeExpression(templates.number, data));
 		});
+		it ('Should identify a negative integer as a number.', function() {
+			assert.equal(templates.number_neg, parseutil.normalizeExpression(templates.number_neg, data));
+		});
+		it ('Should not identify a non-number as a number.', function() {
+			assert.equal(BISTRO_FAILURE, parseutil.normalizeExpression(templates.number_invalid, data));
+		});
+
 		it ('Should identify a decimal as a number.', function() {
 			assert.equal(templates.decimal, parseutil.normalizeExpression(templates.decimal, data));
 		});
@@ -36,6 +47,17 @@ describe('Parse Utils', function() {
 		it ('Should identify a mixed literal as a literal.', function() {
 			assert.equal("123 Hello Wor789ld", parseutil.normalizeExpression(templates.literal_mixedcase, data));
 		});
+		it ('Should identify an empty literal as a literal.', function() {
+			assert.equal("", parseutil.normalizeExpression(templates.literal_empty, data));
+		});
+		it ('Should identify an escaped literal as a literal.', function() {
+			assert.equal('123\"abc', parseutil.normalizeExpression(templates.literal_escaped, data));
+		});
+		it ('Should identify a literal number as a literal.', function() {
+			assert.equal('12345', parseutil.normalizeExpression(templates.literal_number, data));
+		});
+
+
 		it ('Should identify and replace a variable with it\'s value.', function() {
 			assert.equal(data.foo, parseutil.normalizeExpression(templates.variable, data));
 		});
