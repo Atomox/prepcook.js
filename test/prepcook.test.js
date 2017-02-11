@@ -1,6 +1,7 @@
 var assert = require('assert');
 
 var prepcook = prepcook || require('../prepcook');
+const BISTRO_FAILURE = BISTRO_FAILURE || '__FAILURE';
 
 describe('Prepcook Module', function() {
 	describe('Parse', function() {
@@ -14,6 +15,7 @@ describe('Prepcook Module', function() {
 			if_else_false: '{{ #if false }}This is not True{{ #else }} NOT {{ /else }}',
 			if_elif_else: '{{ #if a }}A{{#elif b}}B{{ #else }}C{{ /else }}',
 			each: '{{ #each a }}{{ [b] }}{{/each }}',
+			each_string: '{{ #each a }}{{ [.] }}{{/each }}',
 			object_notation: '[bar.baz]'
 		};
 
@@ -96,11 +98,30 @@ describe('Prepcook Module', function() {
 		});
 
 
-		it ('Should return all elements in #each', function() {
+		it ('Should return all elements in #each.', function() {
 			return prepcook.processTemplate({a: [{b: 'abc'}, {b: 'bcd'}, {b: 'cde'}]}, templates.each)
 				.then(function(tpl) { 
 					assert.equal("abcbcdcde", tpl); });
 		});
-		
+		it ('Should eval . as the current element in #each for strings.', function() {
+			return prepcook.processTemplate({a: ['abc', 'bcd', 'cde']}, templates.each_string)
+				.then(function(tpl) { 
+					assert.equal("abcbcdcde", tpl); });
+		});
+		it ('Should eval . as the current element in #each for numbers.', function() {
+			return prepcook.processTemplate({a: ['123', '456', '789']}, templates.each_string)
+				.then(function(tpl) { 
+					assert.equal("123456789", tpl); });
+		});
+		it ('Should not eval . if the current element in #each is complex.', function() {
+			return prepcook.processTemplate({a: [{b:'abc'}, {b:'bcd'}, {b:'cde'}]}, templates.each_string)
+				.then(function(tpl) { 
+					assert.equal(BISTRO_FAILURE+BISTRO_FAILURE+BISTRO_FAILURE, tpl); });
+		});
+		it ('Should only eval . if the current element in #each is a string or number.', function() {
+			return prepcook.processTemplate({a: ['123', {b:'bcd'}, 'cde']}, templates.each_string)
+				.then(function(tpl) { 
+					assert.equal(123+BISTRO_FAILURE+'cde', tpl); });
+		});
 	});
 });

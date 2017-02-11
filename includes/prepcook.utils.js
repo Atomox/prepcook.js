@@ -204,7 +204,8 @@ var server_utils = (function utils() {
 
 		var regex_path = /^([a-z][_\-a-z0-9]+)\.(([a-z][_\-a-z0-9]+)\.?)+$/i,
 		    regex_num = /^[\-0-9]+[.]?[0-9]*$/,
-		    regex_literal = /^[\'\"](.*)[\'\"]$/i;
+		    regex_literal = /^[\'\"](.*)[\'\"]$/i,
+		    regex_period = /^\.$/i;
 
 		if (typeof exp === 'string') {
 			exp = exp.trim();
@@ -213,6 +214,10 @@ var server_utils = (function utils() {
 			else if (exp == 'false') { exp = false; }
 			else if (regex_num.test(exp)) { exp = Number(exp); }
 			else if (regex_literal.test(exp)) { exp = unwrap(exp, ["'", '"']); }
+			else if (regex_period.test(exp) && (typeof data === 'string' || typeof data === 'number')) { 
+				if (regex_num.test(exp)) { exp = Number(exp); }
+				else {exp = data; } 
+			}
 			else if (typeof data !== 'object' || data === null) { 
 				console.warn('Expression appears to depend upon data, Expected as object, but found', typeof data, '.'); 
 				exp = BISTRO_FAILURE;

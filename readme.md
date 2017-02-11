@@ -83,6 +83,16 @@ Or nest them.
 	/each }}
 ```
 
+Refer to the *current element in a simple string* array using `[.]`
+Assume `var foo = ['foo', 'bar', 'baz'];`
+
+```
+	{{ #each foo }}
+		Checkout My current element (spoilers: it's a string): 
+		{{ [.] }}
+	{{ /each }}
+```
+
 ### Angular-style Filters:
 
 Inspired by Angular, you can apply filters to your variables or literals before outputting them. Just add a pipe `|` to the end of your variable:
