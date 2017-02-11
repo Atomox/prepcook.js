@@ -29,7 +29,7 @@ var chef = (function chefFactory() {
 				var parse_tree = parseTree(template);
 
 				// Debugger
-				parse_tree.dump();
+//				parse_tree.dump();
 
 				var parsed_tpl = resolveParseTree(parse_tree, data);
 
@@ -213,10 +213,11 @@ var chef = (function chefFactory() {
 			}
         }
         else {
-        	// Expressions shouldn't have children.
-        	visit_children = false;
-
-        	result += lang.resolveContent(node.data.type, node.data.data, vars);
+        	if (node.data.type == 'constant' || node.data.type == 'expression') {
+	        	// Expressions shouldn't have children.
+	        	visit_children = false;
+	        	result += lang.resolveContent(node.data.type, node.data.data, vars);
+	        }
 
         	// White space shouldn't change state.
 	        if (node.data.type == 'constant' && node.data.data.trim() == '') {
@@ -237,6 +238,9 @@ var chef = (function chefFactory() {
 				            	var temp_result = traverseParseTree(children[j], vars[node.data.data][i], (level+1), options);
 				            	result += temp_result.result;
 				            	options = temp_result.options;
+				            }
+				            else {
+				            	console.warn('No Children in loop for: ', node.data.type);
 				            }
 				        }        			
 	        		}

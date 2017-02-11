@@ -112,9 +112,6 @@ var lang = (function languageFactory() {
 
 
 	function isLinkedConditional (type) {
-		if (getWordDefinition(type).behavior == 'linked-conditional') {
-			console.log(type, ' is linked conditional.');
-		}
 		return (getWordDefinition(type).behavior == 'linked-conditional') ? true : false;
 	}
 
@@ -188,7 +185,6 @@ var lang = (function languageFactory() {
 	function evalConditional(type, expression, data) {
 
 		try {
-			console.log(type + '...');
 			// Since else has no expression, always return true right away.
 			if (type == '#else') { return true; }
 

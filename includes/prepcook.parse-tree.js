@@ -30,7 +30,7 @@ var parseTree = (function pathFactory() {
      */
     ParseTree.prototype.add = function getLeaf (type, parentId, parent, data) {
 
-        console.log(' -> Adding Leaf: ' + type + ' to parent: ');
+//        console.log(' -> Adding Leaf: ' + type + ' to parent: ');
         
         try {
             // Attempt to get the parent node, if not passed, using either the ID,
