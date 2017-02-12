@@ -13,6 +13,7 @@ Templating based on concepts from handlebars.js and angular.js.
 * npm install from scratch now working after initial dependencies issues.
 * CI integration with Travis. 
 * Implode Filter for quick concat of simple arrays.
+* Better abstraction of global consts.
 
 ## Requirements:
 
