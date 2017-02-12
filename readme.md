@@ -10,15 +10,15 @@ Templating based on concepts from handlebars.js and angular.js.
 
 ## Updates: 
 0.3.0 
-* npm install from scratch now working after initial dependencies issues.
+* #4 npm install from scratch now working after initial dependencies issues.
 * CI integration with Travis. 
 * Implode Filter for quick concat of simple arrays.
-* Better abstraction of global consts.
+* #5 Better abstraction of global consts.
 
 ## Dependencies:
 Make sure to include these dependencies, or have them installed automatically when you `npm install prepcook.js`.
 * [bistro.tree.js](https://github.com/Atomox/bistro.js.tree/blob/master/bistro.js.tree.js), the underlying tree data structure we use to process your templates with.
-* (DEV) Mocha, for testing.
+* (DEV) [Mocha](https://www.npmjs.com/package/mocha), for testing.
 
 ## Using it is simple.
 
