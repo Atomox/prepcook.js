@@ -10,9 +10,9 @@ Templating based on concepts from handlebars.js and angular.js.
 
 ## Updates: 
 0.3.0 
-	* npm install from scratch now working after initial dependencies issues.
-    * CI integration with Travis. 
-    * Implode Filter for quick concat of simple arrays.
+* npm install from scratch now working after initial dependencies issues.
+* CI integration with Travis. 
+* Implode Filter for quick concat of simple arrays.
 
 ## Requirements:
 
