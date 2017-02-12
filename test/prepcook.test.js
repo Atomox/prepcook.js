@@ -1,9 +1,16 @@
 var assert = require('assert');
 
 var prepcook = prepcook || require('../prepcook');
-const BISTRO_FAILURE = '__FAILURE';
+const constants = require('../prepcook.config');
+const BISTRO_FAILURE = constants.BISTRO_FAILURE;
 
 describe('Prepcook Module', function() {
+	describe('Config', function() {
+		it ('Should define const BISTRO_FAILURE', function() {
+			assert.equal('__FAILURE', BISTRO_FAILURE);
+		});
+	});
+
 	describe('Parse', function() {
 		var templates = {
 			basic: '<html><body>Hello World</body></html>',

@@ -4,9 +4,10 @@ var parseutil = parseutil || require('./includes/prepcook.utils'),
 	stack = stack || require('./includes/prepcook.stack'),
 	lang = lang || require('./prepcook.language');
 
+const constants = require('./prepcook.config');
+const BISTRO_FAILURE = constants.BISTRO_FAILURE;
 
 var chef = (function chefFactory() {
-	const BISTRO_FAILURE = '__FAILURE';
 
 	/**
 	 * Given a template and some contextual data, parse, evaluate,
@@ -89,6 +90,8 @@ var chef = (function chefFactory() {
 					}
 
 					switch(my_type) {
+
+						case 'loader':
 						case 'block':
 							// Add the block_word to the tree, and the parent to the stack.
 							my_leaf = tree.add(command.word, parents.peek().id, parents.peek(), command.segment);

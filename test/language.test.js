@@ -1,5 +1,7 @@
 var assert = require('assert');
-const BISTRO_FAILURE = '__FAILURE';
+
+const constants = require('../prepcook.config');
+const BISTRO_FAILURE = constants.BISTRO_FAILURE;
 
 var lang = lang || require('../prepcook.language');
 

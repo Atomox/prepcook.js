@@ -1,4 +1,5 @@
-const BISTRO_FAILURE = BISTRO_FAILURE || '__FAILURE';
+const constants = require('../prepcook.config');
+const BISTRO_FAILURE = constants.BISTRO_FAILURE;
 
 var server_utils = (function utils() {
 

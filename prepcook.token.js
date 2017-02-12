@@ -9,7 +9,8 @@
 var parseutil = parseutil || require('./includes/prepcook.utils'),
 	filter = filter || require('./prepcook.filter');
 
-const BISTRO_FAILURE = BISTRO_FAILURE || '__FAILURE';
+const constants = require('./prepcook.config');
+const BISTRO_FAILURE = constants.BISTRO_FAILURE;
 
 var prepcook_tokenizer = (function tokenProcessFactory() {
 

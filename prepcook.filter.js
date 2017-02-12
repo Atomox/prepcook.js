@@ -8,7 +8,8 @@
 
 var parseutil = parseutil || require('./includes/prepcook.utils');
 
-const BISTRO_FAILURE = BISTRO_FAILURE || '__FAILURE';
+const constants = require('./prepcook.config');
+const BISTRO_FAILURE = constants.BISTRO_FAILURE;
 
 
 var prepcookFilter = (function FilterFactory() {
@@ -125,6 +126,30 @@ var prepcookFilter = (function FilterFactory() {
 
 
 	/**
+	 * Join all elements of an object into a string, separated by a delimeter.
+	 * 
+	 * @param  {object|array} data
+	 *   The items to join.
+	 * @param  {string} delimeter
+	 *   The separater between each piece.
+	 * 
+	 * @return {string|object}
+	 *   The joined object in string format. If object or delimeter were illegal,
+	 *   the original data is returned, unmodified.
+	 */
+	function filterImplode(data, delimeter) {
+		if (typeof data !== 'object' || data === null) {
+			console.warn('Cannot explode non-object.');
+			return data;
+		}
+		else if (typeof delimeter !== 'string') {
+			console.warn('Cannot Implode object with an invalid delimeter.')
+		}
+		return data.join(delimeter);
+	}
+
+
+	/**
 	 * Filter a string to lowercase
 	 * 
 	 * @param  {string} data
@@ -178,6 +203,7 @@ var prepcookFilter = (function FilterFactory() {
 		currency: filterCurrency,
 		date: filterDate,
 		json: filterToJSON,
+		implode: filterImplode,
 		filter: filterFilter,
 		uppercase: filterUppercase,
 		lowercase: filterLowercase
@@ -188,6 +214,7 @@ module.exports = {
 	currency: prepcookFilter.currency,
 	date: prepcookFilter.date,
 	json: prepcookFilter.json,
+	implode: prepcookFilter.implode,
 	filter: prepcookFilter.filter,
 	uppercase: prepcookFilter.uppercase,
 	lowercase: prepcookFilter.lowercase

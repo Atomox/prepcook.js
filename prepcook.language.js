@@ -11,7 +11,8 @@
 var parsetoken = parsetoken || require('./prepcook.token'),
 	parseutil = parseutil || require('./includes/prepcook.utils.js');
 
-const BISTRO_FAILURE = BISTRO_FAILURE || '__FAILURE';
+const constants = require('./prepcook.config');
+const BISTRO_FAILURE = constants.BISTRO_FAILURE;
 
 var lang = (function languageFactory() {
 	
@@ -26,7 +27,9 @@ var lang = (function languageFactory() {
 		'#elif',
 		'/elif',
 		'#unless',
-		'/unless'
+		'/unless',
+		'#template',
+		'/template'
 	];
 
 	// The definition of each reserve word, it's type, and behavior.
@@ -77,7 +80,13 @@ var lang = (function languageFactory() {
 				rules: [
 					'none'
 				]
-			}
+			},
+		'#template': {
+				type: 'loader',
+				behavior: 'loader',
+				start: '#template',
+				end: '/template'
+		}
 	};
 
 	function getWordList () {
