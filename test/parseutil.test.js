@@ -1,5 +1,5 @@
 var assert = require('assert');
-const BISTRO_FAILURE = BISTRO_FAILURE || '__FAILURE';
+const BISTRO_FAILURE = '__FAILURE';
 
 var parseutil = parseutil || require('../includes/prepcook.utils');
 

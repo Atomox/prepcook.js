@@ -1,7 +1,7 @@
 var assert = require('assert');
 
 var prepcook = prepcook || require('../prepcook');
-const BISTRO_FAILURE = BISTRO_FAILURE || '__FAILURE';
+const BISTRO_FAILURE = '__FAILURE';
 
 describe('Prepcook Module', function() {
 	describe('Parse', function() {
