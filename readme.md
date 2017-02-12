@@ -165,6 +165,8 @@ We use Mocha to run tests to make sure the components are working together as ex
 * [bistro.tree.js](https://github.com/Atomox/bistro.js.tree/blob/master/bistro.js.tree.js), the underlying tree data structure we use to process your templates with.
 * (DEV) [Mocha](https://www.npmjs.com/package/mocha), for testing.
 
+Dependencies for node generally go in your project, under `/node_modules/[module_name_here]. See "Loading from `node_modules` Folders" in [Node Modules](https://nodejs.org/docs/v0.4.1/api/modules.html).
+
 
 ## TODO
 1. `#each` has no way to access data when iterating over a leaf array/object. Consider changing to #each a AS b syntax.
