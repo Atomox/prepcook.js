@@ -16,7 +16,8 @@ Templating based on concepts from handlebars.js and angular.js.
 * [Better abstraction](https://github.com/Atomox/prepcook.js/issues/5) of global consts.
 
 ## Dependencies:
-Make sure to include these dependencies, or have them installed automatically when you `npm install prepcook.js`.
+```npm install prepcook.js```
+or add these dependencies manually: 
 * [bistro.tree.js](https://github.com/Atomox/bistro.js.tree/blob/master/bistro.js.tree.js), the underlying tree data structure we use to process your templates with.
 * (DEV) [Mocha](https://www.npmjs.com/package/mocha), for testing.
 
