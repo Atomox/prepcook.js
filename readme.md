@@ -10,10 +10,10 @@ Templating based on concepts from handlebars.js and angular.js.
 
 ## Updates: 
 0.3.0 
-* #4 npm install from scratch now working after initial dependencies issues.
+* npm install from scratch now working after [initial dependencies issues](#4).
 * CI integration with Travis. 
 * Implode Filter for quick concat of simple arrays.
-* #5 Better abstraction of global consts.
+* [Better abstraction](#5) of global consts.
 
 ## Dependencies:
 Make sure to include these dependencies, or have them installed automatically when you `npm install prepcook.js`.
