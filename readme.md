@@ -15,13 +15,8 @@ Templating based on concepts from handlebars.js and angular.js.
 * Implode Filter for quick concat of simple arrays.
 * [Better abstraction](https://github.com/Atomox/prepcook.js/issues/5) of global consts.
 
-## Install:
-```npm install prepcook.js```
-or add these dependencies manually: 
-* [bistro.tree.js](https://github.com/Atomox/bistro.js.tree/blob/master/bistro.js.tree.js), the underlying tree data structure we use to process your templates with.
-* (DEV) [Mocha](https://www.npmjs.com/package/mocha), for testing.
-
 ## Using it is simple.
+First, ```npm install prepcook.js``` (see [Dependencies](#manual-dependency-setup) if you'd rather do this manually). Then, 
 
 1. Just require the package's module:
   ```var prepcook = prepcook || require ('prepcook');```
@@ -163,6 +158,12 @@ Reference like follows:
 ## Tests in Mocha
 
 We use Mocha to run tests to make sure the components are working together as expected. Currently, you'll need to install mocha yourself, then run: `npm test` in the prepcook.js directory.
+
+
+## Manual Dependency Setup
+```npm install prepcook.js``` will take care of everything for you. If you'd rather download it yourself, make sure to include these dependencies:
+* [bistro.tree.js](https://github.com/Atomox/bistro.js.tree/blob/master/bistro.js.tree.js), the underlying tree data structure we use to process your templates with.
+* (DEV) [Mocha](https://www.npmjs.com/package/mocha), for testing.
 
 
 ## TODO
