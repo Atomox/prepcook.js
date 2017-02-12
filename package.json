@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/Atomox/prepcook.js#readme",
   "dependencies": {
-    "bistro.js.tree": "^0.0.0"
+    "bistro.js.tree": "^0.0.1"
   },
   "directories": {
     "includes": "includes",
