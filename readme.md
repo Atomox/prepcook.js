@@ -8,6 +8,12 @@ Templating based on concepts from handlebars.js and angular.js.
 
 [![Build Status](https://travis-ci.org/Atomox/prepcook.js.svg?branch=master)](https://travis-ci.org/Atomox/prepcook.js)
 
+## Updates: 
+0.3.0 
+	- npm install from scratch now working after initial dependencies issues.
+    - CI integration with Travis. 
+    - Implode Filter for quick concat of simple arrays.
+
 ## Requirements:
 
 Make sure to have [bistro.tree.js](https://github.com/Atomox/bistro.js.tree/blob/master/bistro.js.tree.js), the underlying tree data structure we use to process your templates with.
