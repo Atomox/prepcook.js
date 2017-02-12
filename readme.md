@@ -15,7 +15,7 @@ Templating based on concepts from handlebars.js and angular.js.
 * Implode Filter for quick concat of simple arrays.
 * [Better abstraction](https://github.com/Atomox/prepcook.js/issues/5) of global consts.
 
-## Dependencies:
+## Install:
 ```npm install prepcook.js```
 or add these dependencies manually: 
 * [bistro.tree.js](https://github.com/Atomox/bistro.js.tree/blob/master/bistro.js.tree.js), the underlying tree data structure we use to process your templates with.
