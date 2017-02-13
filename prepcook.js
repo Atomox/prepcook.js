@@ -10,6 +10,39 @@ const BISTRO_FAILURE = constants.BISTRO_FAILURE;
 var chef = (function chefFactory() {
 
 	/**
+	 * Bind a Prepcook setting to the prepcook namespace.
+	 * 
+	 * @param  {object} data
+	 *   The data object which will be passed to processTemplate.
+	 * @param  {string} type
+	 *   The type of thing we are binding. E.G. #template for template loading function.
+	 * @param  {function} funct
+	 *   The callback function. Should generally be a promise.
+	 * 
+	 * @return {object}
+	 *   The data object, with binding appended.
+	 */
+	function prepcookBindFunction(data, type, funct) {
+		if (typeof data === 'object') {
+			if (data === null) {
+				data = {};
+			}
+		}
+
+		if (!data.__prepcook){
+			data['__prepcook'] = {};
+		}
+
+		switch (type) {
+			case '#template':
+				data.__prepcook['#template'] = funct;
+				break;
+		}
+
+		return data;
+	}
+
+	/**
 	 * Given a template and some contextual data, parse, evaluate,
 	 * and return our final template for display to the user.
 	 * 
@@ -95,7 +128,7 @@ var chef = (function chefFactory() {
 						case 'block':
 							// Add the block_word to the tree, and the parent to the stack.
 							my_leaf = tree.add(command.word, parents.peek().id, parents.peek(), command.segment);
-							parents.push(my_leaf);						
+							parents.push(my_leaf);
 							break;
 					
 						case 'block_terminus':
@@ -149,7 +182,46 @@ var chef = (function chefFactory() {
 	 *   The final template, translated into normal HTML.
 	 */
 	function resolveParseTree (tree, data) {
-		return traverseParseTree(tree.root(), data);
+		return traverseParseTree(tree.root(), data, '');
+	}
+
+
+	/**
+	 * Given a variable path, resolve it, and return that sub-data.
+	 * 
+	 * @param  {object} vars
+	 *   The template variable object.
+	 * @param  {string} path
+	 *   The path to the current object location, in dot notation.
+	 *   Note: numbers will resolve to the current element in an array.
+	 *  
+	 * @return {mixed}
+	 *   The current sub-object the path points to.
+	 */
+	function resolveVarPath (vars, path) {
+
+		/**
+		 * @todo 
+		 *
+		 * 
+		 *   Handle errors when not found.
+		 * 
+		 */
+
+		if (path.length <= 0) {
+			return vars;
+		}
+
+		var my_path = path.split('.');
+		var tmp = vars;
+
+		for (var i = 0; i < my_path.length; i++) {
+			if (tmp[my_path[i]]) {
+				tmp = tmp[my_path[i]];
+			}
+		}
+
+		return tmp;
 	}
 
 
@@ -168,14 +240,19 @@ var chef = (function chefFactory() {
 	 * @return {string}
 	 *    The resolved tree, including resolved commands and tokens.
 	 */
-	function traverseParseTree (node, vars, level, options) {
- 
+	function traverseParseTree (node, vars, curr_path, level, options) {
+
         if (typeof node === 'undefined') {
         	console.warn('Cannot resolve undefined parse tree.');
         }
         //
         //   @todo
         //     node instanceof
+        
+        // Get the sub-set of vars at this current scope.
+        // We pass the entire context array throughout parsing, but a current path pointer (path),
+        // so we can use the current scope for the node we are about to evaluate.
+        var curr_vars = resolveVarPath(vars, curr_path);
         
         if (!level) { level = 0; }
         options = options || {
@@ -194,7 +271,7 @@ var chef = (function chefFactory() {
         // Do we show the data for this node, or is it a decider for how to show it's children?
         // Constandants and expressions get evaluated.
         else if (lang.isConditional(node.data.type) === true) {
-        	visit_children = lang.resolveConditional(node.data.type, node.data.data, vars);
+        	visit_children = lang.resolveConditional(node.data.type, node.data.data, curr_vars);
 
         	if (!visit_children) {
         		options.enable_linked_conditional = true;	
@@ -206,7 +283,7 @@ var chef = (function chefFactory() {
         else if (lang.isLinkedConditional(node.data.type) === true) {
 
         	if (options.enable_linked_conditional === true) {
-	        	visit_children = lang.resolveConditional(node.data.type, node.data.data, vars);
+	        	visit_children = lang.resolveConditional(node.data.type, node.data.data, curr_vars);
 
 	        	// If conditional failed, allow a linked conditional to fire on the next iteration.
 	        	options.enable_linked_conditional = (visit_children === false) ? true : false;
@@ -219,7 +296,7 @@ var chef = (function chefFactory() {
         	if (node.data.type == 'constant' || node.data.type == 'expression') {
 	        	// Expressions shouldn't have children.
 	        	visit_children = false;
-	        	result += lang.resolveContent(node.data.type, node.data.data, vars);
+	        	result += lang.resolveContent(node.data.type, node.data.data, curr_vars);
 	        }
 
         	// White space shouldn't change state.
@@ -234,11 +311,13 @@ var chef = (function chefFactory() {
         if (visit_children === true) {
 	        // Loops render their decendants more than once, generally.
 	        if (node.data && lang.isIterator(node.data.type)) {
-	        	if (typeof vars[node.data.data] === 'object') {
-	        		for (var i = 0; i < vars[node.data.data].length; i++) {
+	        	if (typeof curr_vars[node.data.data] === 'object') {
+	        		for (var i = 0; i < curr_vars[node.data.data].length; i++) {
 				        for (var j = 0; j < children.length; j++) {
 				            if (children[j]) {
-				            	var temp_result = traverseParseTree(children[j], vars[node.data.data][i], (level+1), options);
+				            	var my_path = (curr_path) ? curr_path + '.' : '';
+				            	my_path += node.data.data + '.' + i;
+				            	var temp_result = traverseParseTree(children[j], vars, my_path, (level+1), options);
 				            	result += temp_result.result;
 				            	options = temp_result.options;
 				            }
@@ -253,7 +332,7 @@ var chef = (function chefFactory() {
 	        else {
 		        for (var j = 0; j < children.length; j++) {
 		            if (children[j]) {
-		                var temp_result = traverseParseTree(children[j], vars, (level+1), options);
+		                var temp_result = traverseParseTree(children[j], vars, curr_path, (level+1), options);
 		            	result += temp_result.result;
 		            	options = temp_result.options;
 		            }
@@ -391,10 +470,12 @@ var chef = (function chefFactory() {
 
 	
 	return {
-		processTemplate: processTemplate
+		processTemplate: processTemplate,
+		bindFunction: prepcookBindFunction
 	};
 })();
 
 module.exports = {
-	processTemplate: chef.processTemplate
+	processTemplate: chef.processTemplate,
+	config: chef.bindFunction
 };

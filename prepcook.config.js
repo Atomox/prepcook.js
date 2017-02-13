@@ -1,5 +1,7 @@
 /**
  * Initialize constants that can be include elsewhere.
+ *
+ * @see  http://stackoverflow.com/a/8596808/938281
  */
 function define(name, value) {
 	Object.defineProperty(exports, name, {

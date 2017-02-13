@@ -23,6 +23,7 @@ describe('Prepcook Module', function() {
 			if_elif_else: '{{ #if a }}A{{#elif b}}B{{ #else }}C{{ /else }}',
 			each: '{{ #each a }}{{ [b] }}{{/each }}',
 			each_string: '{{ #each a }}{{ [.] }}{{/each }}',
+			each_nested: '{{ #each people #each name }}{{[.]}}{{ /each /each }}',
 			object_notation: '[bar.baz]'
 		};
 
@@ -31,10 +32,16 @@ describe('Prepcook Module', function() {
 		var data = {
 			foo: 'fubar',
 			bar: {baz: 'hi there'},
+			people: [
+				{name: ['a', 'b','c'] },
+				{name: ['d', 'e', 'f'] },
+				{name: ['g', 'h', 'i'] }
+			],
 			a: true,
 			b: true,
 			c: true
 		};
+
 
 		// Promises & Bad Data
 
@@ -109,6 +116,13 @@ describe('Prepcook Module', function() {
 			return prepcook.processTemplate({a: [{b: 'abc'}, {b: 'bcd'}, {b: 'cde'}]}, templates.each)
 				.then(function(tpl) { 
 					assert.equal("abcbcdcde", tpl); });
+		});
+
+		it ('Should eval nested #each loop variables properly.', function() {
+			return prepcook.processTemplate(data, templates.each_nested)
+				.then(function(tpl) {
+					assert.equal('abcdefghi', tpl);
+				});
 		});
 		it ('Should eval . as the current element in #each for strings.', function() {
 			return prepcook.processTemplate({a: ['abc', 'bcd', 'cde']}, templates.each_string)
