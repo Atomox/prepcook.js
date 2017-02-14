@@ -23,15 +23,8 @@ var chef = (function chefFactory() {
 	 *   The data object, with binding appended.
 	 */
 	function prepcookBindFunction(data, type, funct) {
-		if (typeof data === 'object') {
-			if (data === null) {
-				data = {};
-			}
-		}
 
-		if (!data.__prepcook){
-			data['__prepcook'] = {};
-		}
+		data = prepcookPrepareData(data);
 
 		switch (type) {
 			case '#template':
@@ -41,6 +34,63 @@ var chef = (function chefFactory() {
 
 		return data;
 	}
+
+
+	/**
+	 * Bind a subtemplate to the data object, so prepcook can resolve subtemplates later.
+	 * 
+	 * @param  {object} data
+	 *   The data object which will be passed to processTemplate.
+	 * @param  {string} name
+	 *   The machine_name of the template.
+	 * @param  {string} tpl
+	 *   The template to be parsed.
+	 * @param  {object} vars
+	 *   The vars needed when parsing the passed template.
+	 * 
+	 * @return {object}
+	 *   The data object, with binding appended.
+	 */
+	function prepcookBindSubTemplate(data, name, tpl, vars) {
+
+		data = prepcookPrepareData(data);
+
+		data.__prepcook.templates[name] = {
+			template: tpl,
+			vars: vars
+		};
+
+		return data;
+	}
+
+
+	/**
+	 * Initialize a template data object, if not already.
+	 * 
+	 * @param  {object} data
+	 *   The data object which will be passed to processTemplate.
+	 * 
+	 * @return {object}
+	 *   The data object, prepared.
+	 */
+	function prepcookPrepareData(data) {
+
+		if (typeof data === 'object') {
+			if (data === null) {
+				data = {};
+			}
+		}
+
+		if (!data.__prepcook) {
+			data['__prepcook'] = {};
+		}
+		if (!data.__prepcook.templates) {
+			data.__prepcook.templates = [];
+		}
+
+		return data;
+	}
+
 
 	/**
 	 * Given a template and some contextual data, parse, evaluate,
@@ -268,6 +318,63 @@ var chef = (function chefFactory() {
         	// Do nothing.
         	options.enable_linked_conditional = false;
         }
+        else if (lang.isLoader(node.data.type) === true) {
+
+        	// 
+        	// 
+        	// 
+        	// 
+        	// 
+        	// 
+        	// @TODO
+        	// 
+        	//   call 
+        	// 
+        	// 
+        	// 
+        	// 
+        	// 
+        	console.warn ('We\'ve got a loader! --- ', node.data);
+        	var tpl_name = node.data.data.split(':');
+        	console.log(tpl_name);
+        	if (tpl_name[0]) {
+	        	if (vars.__prepcook.templates[tpl_name[0]]) {
+	        		var sub_tpl = vars.__prepcook.templates[tpl_name[0]];
+	        		console.log(sub_tpl);
+
+	        		/**
+	        		 
+
+
+
+	        		  @TODO
+
+						How do we inject this sub template's promise into the rest of the template parsing?
+
+
+
+
+
+	        		 */
+	        		var sub_template = processTemplate(sub_tpl.vars, sub_tpl.template);
+	        	}
+			}
+
+			//
+			//
+			//
+			//
+			//
+			//
+			// @TODO
+			//
+			//
+			//
+			//
+			//
+			//
+			//
+        }
         // Do we show the data for this node, or is it a decider for how to show it's children?
         // Constandants and expressions get evaluated.
         else if (lang.isConditional(node.data.type) === true) {
@@ -471,11 +578,13 @@ var chef = (function chefFactory() {
 	
 	return {
 		processTemplate: processTemplate,
-		bindFunction: prepcookBindFunction
+		bindFunction: prepcookBindFunction,
+		bindSubTemplate: prepcookBindSubTemplate
 	};
 })();
 
 module.exports = {
 	processTemplate: chef.processTemplate,
-	config: chef.bindFunction
+	config: chef.bindFunction,
+	bindSubTemplate: chef.bindSubTemplate
 };

@@ -169,10 +169,9 @@ Dependencies for node generally go in your project, under `/node_modules/[module
 
 
 ## TODO
-1. `#each` has no way to access data when iterating over a leaf array/object. Consider changing to #each a AS b syntax.
-2. `#each` should be able to view data outside of it's scope, using `../`
+1. `#each` should be able to view data outside of it's scope, using `../`
 	a. Instead of passing the object subtree to #each, we should pass the original object, and a current path string. Think PWD in BASH.
-3. We should be able to reference sub-templates inside of our template.
-4. We should split up rendering sub-trees asynchroniously.
-5. Can we add an #async or #lazy command, which loads it's subtree after passing to the browser? It could set proper placeholders/ids, and attach the approprate JS along with the template in order to facilitate AJAX calls when the page loads.
-6. Performance check.
+2. We should be able to reference sub-templates inside of our template.
+3. We should split up rendering sub-trees asynchroniously.
+4. Can we add an #async or #lazy command, which loads it's subtree after passing to the browser? It could set proper placeholders/ids, and attach the approprate JS along with the template in order to facilitate AJAX calls when the page loads.
+5. Performance check.

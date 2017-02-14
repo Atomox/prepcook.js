@@ -130,6 +130,11 @@ var lang = (function languageFactory() {
 	}
 
 
+	function isLoader (type) {
+		return (getWordDefinition(type).behavior == 'loader') ? true : false;
+	}
+
+
 	function resolveContent (type, data, vars) {
 		if (type == 'constant' && typeof data !== 'undefined') {
 			return data.trim();
@@ -272,6 +277,7 @@ var lang = (function languageFactory() {
 		isConditional: isConditional,
 		isLinkedConditional: isLinkedConditional,
 		isIterator: isIterator,
+		isLoader: isLoader,
 		resolveContent: resolveContent,
 		resolveConditional: resolveConditional
 	};
@@ -284,6 +290,7 @@ module.exports = {
 	isConditional: lang.isConditional,
 	isLinkedConditional: lang.isLinkedConditional,
 	isIterator: lang.isIterator,
+	isLoader: lang.isLoader,
 	resolveContent: lang.resolveContent,
 	resolveConditional: lang.resolveConditional
 };
