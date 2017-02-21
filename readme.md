@@ -9,11 +9,12 @@ Templating based on concepts from handlebars.js and angular.js.
 [![Build Status](https://travis-ci.org/Atomox/prepcook.js.svg?branch=master)](https://travis-ci.org/Atomox/prepcook.js)
 
 ## Updates: 
-0.3.0 
-* npm install from scratch now working after [initial dependencies issues](https://github.com/Atomox/prepcook.js/issues/4).
-* CI integration with Travis. 
-* Implode Filter for quick concat of simple arrays.
-* [Better abstraction](https://github.com/Atomox/prepcook.js/issues/5) of global consts.
+0.4.0
+* We heard you like templates. Now you can put a [template inside your template](https://github.com/Atomox/prepcook.js/issues/3).
+* Steps towards var path evaluating, so ../ notation for variables is coming.
+* More "async" handling of template evaluation. Not really, but lots of promises.
+* New tests.
+
 
 ## Using it is simple.
 First, ```npm install prepcook.js``` (see [Dependencies](#manual-dependency-setup) if you'd rather do this manually). Then, 
@@ -126,6 +127,25 @@ Output a string in all lowercase. Also try `[string|uppercase]`.
 ```
 Output a variable in JSON format.
 
+
+### Nest templates:
+You can nest templates in PrepCook.js.
+
+```
+// Attach a nested template to the data.
+prepcook.bindSubTemplate(outer_tpl_data, 'template_ref_name', the_template, mod_data);
+
+```
+Pass: `the master template's data`, `reference name for your nested template`, `the actual template String`, `any data it needs`,
+
+After that, reference it in your template:
+
+```
+	{{#template template_ref_name}}
+```
+If you passed a data array during binding, that will be used when evaluating your sub template. Otherwise, the master template's data will be assumed.
+
+
 ### Just pass in a context:
 
 Variables get evaluated based upon whatever context object you pass in.  You can only pass one, but you can traverse it yourself. Some functions, like `#each`, traverse them for you.
@@ -171,7 +191,17 @@ Dependencies for node generally go in your project, under `/node_modules/[module
 ## TODO
 1. `#each` should be able to view data outside of it's scope, using `../`
 	a. Instead of passing the object subtree to #each, we should pass the original object, and a current path string. Think PWD in BASH.
-2. We should be able to reference sub-templates inside of our template.
-3. We should split up rendering sub-trees asynchroniously.
-4. Can we add an #async or #lazy command, which loads it's subtree after passing to the browser? It could set proper placeholders/ids, and attach the approprate JS along with the template in order to facilitate AJAX calls when the page loads.
-5. Performance check.
+2. Can we add an #async or #lazy command, which loads it's subtree after passing to the browser? It could set proper placeholders/ids, and attach the approprate JS along with the template in order to facilitate AJAX calls when the page loads.
+3. Performance check.
+
+## Updates: 
+0.4.0
+* Template Nesting.
+* Sub tree rendering now split up "asynchroniously."
+* Work towards scope traversal. Foundation for '../' variable operator.
+
+0.3.0
+* npm install from scratch now working after [initial dependencies issues](https://github.com/Atomox/prepcook.js/issues/4).
+* CI integration with Travis. 
+* Implode Filter for quick concat of simple arrays.
+* [Better abstraction](https://github.com/Atomox/prepcook.js/issues/5) of global consts.

@@ -35,7 +35,7 @@ var prepcook_tokenizer = (function tokenProcessFactory() {
 	 * @return {string}
 	 *   The template, with all blocks evaluated.
 	 */
-	function parse (template, vars, delim_lft_rt_callback) {
+	function parse (template, vars, delim_lft_rt_callback, var_path) {
 
 		var left = '',
 			right = template,
@@ -47,7 +47,7 @@ var prepcook_tokenizer = (function tokenProcessFactory() {
 
 			// Process any outstanding segments.
 			if (current_segment !== null) {
-				current_segment = blockProcessCallback(current_segment,vars);
+				current_segment = blockProcessCallback(current_segment, vars, var_path);
 				left += (typeof current_segment == 'string') ? current_segment : '';
 				current_segment = null;
 			}
@@ -61,6 +61,13 @@ var prepcook_tokenizer = (function tokenProcessFactory() {
 				// look for whichever occurs first, and use that one.
 				for (var z = 0; z < delim_lft_rt_callback.length; z++) {
 					var zObj = delim_lft_rt_callback[z];
+
+					if (typeof zObj.left !== 'string' || zObj.left.length <= 0) {
+						throw new Error('Left delimeter was not passed!');
+					}
+					else if (typeof zObj.right !== 'string' || zObj.right.length <= 0) {
+						throw new Error('Right delimeter was not passed!');
+					}
 
 					// Get everything up to our opening paren, and add to complete.
 					// If no seperator is found, we're done.
@@ -108,7 +115,7 @@ var prepcook_tokenizer = (function tokenProcessFactory() {
 	 * @return {string}
 	 *   The segment, with the command evaluated.
 	 */
-	function evalCommandBlock (segment, vars) {
+	function evalCommandBlock (segment, vars, var_path) {
 
 		// This should be either a function or a pattern...
 		var params = segment.split('|');
@@ -122,7 +129,7 @@ var prepcook_tokenizer = (function tokenProcessFactory() {
 				case 'array':
 				case 'list':
 				case 'string':
-					var var_value = parseutil.normalizeExpression(params[0], vars);
+					var var_value = parseutil.normalizeExpression(params[0], vars, var_path);
 					if (var_value !== BISTRO_FAILURE) {
 						maps_to = var_value;
 					}
@@ -148,7 +155,7 @@ var prepcook_tokenizer = (function tokenProcessFactory() {
 					var_args.splice(0, 1);
 
 					if (typeof filter[params[1]] == 'function') {
-						params[0] = parseutil.normalizeExpression(params[0], vars);
+						params[0] = parseutil.normalizeExpression(params[0], vars, var_path);
 						var_value = (params[0] !== BISTRO_FAILURE) ? filter[params[1]](params[0], ...var_args) : BISTRO_FAILURE;
 					}
 
@@ -164,7 +171,7 @@ var prepcook_tokenizer = (function tokenProcessFactory() {
 		}
 
 		// Eval any params or expressions as normal, if there were no filters.
-		return parseutil.normalizeExpression(params[0], vars);
+		return parseutil.normalizeExpression(params[0], vars, var_path);
 	}
 
 	return {

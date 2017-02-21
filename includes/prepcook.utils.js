@@ -190,18 +190,68 @@ var server_utils = (function utils() {
 
 
 	/**
+	 * Given a variable path, resolve it, and return that sub-data.
+	 * 
+	 * @param  {object} vars
+	 *   The template variable object.
+	 * @param  {string} path
+	 *   The path to the current object location, in dot notation.
+	 *   Note: numbers will resolve to the current element in an array.
+	 *  
+	 * @return {mixed}
+	 *   The current sub-object the path points to.
+	 */
+	function resolveVarPath (vars, path) {
+
+		if (typeof vars !== 'object' || vars === null) {
+			throw new Error('Cannot resolve path for non-object.');
+		}
+		else if (typeof path !== 'string') {
+			throw new Error('Cannot resolve non-string path.');
+		}
+
+		if (path.length <= 0) {
+			return vars;
+		}
+
+		var my_path = path.split('.');
+		var tmp = vars;
+
+		for (var i = 0; i < my_path.length; i++) {
+			if (tmp[my_path[i]]) {
+				tmp = tmp[my_path[i]];
+			}
+			else {
+				throw new Error('Cannot resolve complete path in relative path.');
+			}
+		}
+
+		return tmp;
+	}
+
+
+	/**
 	 * Given an exression in a template passed as part of a reserve word,
 	 * normalize the value, so it maybe be properly evaluated.
 	 * 
 	 * @param  {string} exp
 	 *   Some expression in string form, like foo.bar, 123, or true.
 	 * @param  {obj} data
-	 *   The context data where we can featch any data to evaluate this expression.
+	 *   The context data where we can fetch any data to evaluate this expression.
+	 * @param {string} var_path
+	 *   A path we can eval to traverse the data to find the location of our value.
 	 * 
 	 * @return {mixed|Failure}
 	 *   The normalized value, or failure.
 	 */
-	function normalizeExpression(exp, data) {
+	function normalizeExpression(exp, data, var_path) {
+
+		// Get the sub-set of vars at this current scope.
+		// We pass the entire context array throughout parsing, but a current path pointer (path),
+		// so we can use the current scope for the expression we are about to evaluate.
+		if (typeof var_path === 'string' && typeof data === 'object') {
+			var data = resolveVarPath(data, var_path);
+		}
 
 		var regex_path = /^([a-z][_\-a-z0-9]+)\.(([a-z][_\-a-z0-9]+)\.?)+$/i,
 		    regex_num = /^[\-0-9]+[.]?[0-9]*$/,
@@ -239,6 +289,7 @@ var server_utils = (function utils() {
 		splitOnce: splitOnce,
 		firstOccuring: firstOccuring,
 		getObjectPath: getObjectPath,
+		resolveVarPath: resolveVarPath,
 		normalizeExpression: normalizeExpression
 	};
 })();
@@ -247,5 +298,6 @@ module.exports = {
 	firstOccuring: server_utils.firstOccuring,
 	splitOnce: server_utils.splitOnce,
 	getObjectPath: server_utils.getObjectPath,
+	resolveVarPath: server_utils.resolveVarPath,
 	normalizeExpression: server_utils.normalizeExpression
 };

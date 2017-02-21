@@ -24,7 +24,11 @@ describe('Prepcook Module', function() {
 			each: '{{ #each a }}{{ [b] }}{{/each }}',
 			each_string: '{{ #each a }}{{ [.] }}{{/each }}',
 			each_nested: '{{ #each people #each name }}{{[.]}}{{ /each /each }}',
-			object_notation: '[bar.baz]'
+			object_notation: '[bar.baz]',
+			complex: '{{ #each a }}{{ [.] }}{{/each }}' + '{{ #if a }}A{{#elif b}}B{{ #else }}C{{ /else }}',
+			nested_template: '{{ [bar.baz] }} {{ #template my_temp:data }} {{[foo|uppercase]}}',
+			nested_template_b: '{{ [bar.baz] }} {{ #template my_other_temp:data }} {{[foo|uppercase]}}',
+			nested_template_c: '{{ [bar.baz] }} {{ #template my_temp:data }} {{ #template my_other_temp:data }} {{[foo|uppercase]}}'
 		};
 
 
@@ -39,7 +43,29 @@ describe('Prepcook Module', function() {
 			],
 			a: true,
 			b: true,
-			c: true
+			c: true,
+			__prepcook:{
+				templates: {
+					my_temp: {
+						template: templates.if_elif_else + '{{[foo]}}',
+						vars: {
+							foo: 'foobar',
+							bar: {baz: 'hi there'},
+							people: [
+								{name: ['a', 'b','c'] },
+								{name: ['d', 'e', 'f'] },
+								{name: ['g', 'h', 'i'] }
+							],
+							a: false,
+							b: true,
+							c: true,
+						}
+					},
+					my_other_temp: {
+						template: templates.if_elif_else + '{{[foo]}}'
+					}
+				}
+			}
 		};
 
 
@@ -143,6 +169,31 @@ describe('Prepcook Module', function() {
 			return prepcook.processTemplate({a: ['123', {b:'bcd'}, 'cde']}, templates.each_string)
 				.then(function(tpl) { 
 					assert.equal(123+BISTRO_FAILURE+'cde', tpl); });
+		});
+
+
+		it ('Should eval a nested template.', function() {
+			return prepcook.processTemplate(data, templates.nested_template)
+				.then(function(tpl) {
+					assert.equal('hi thereBfoobarFUBAR', tpl); });
+		});
+
+		it ('Should eval a nested template using the templates data.', function() {
+			return prepcook.processTemplate(data, templates.nested_template)
+				.then(function(tpl) {
+					assert.equal('hi thereBfoobarFUBAR', tpl); });
+		});
+
+		it ('Should eval a nested template using default data from the outer template.', function() {
+			return prepcook.processTemplate(data, templates.nested_template_b)
+				.then(function(tpl) {
+					assert.equal('hi thereAfubarFUBAR', tpl); });
+		});
+
+		it ('Should eval a multiple nested templates.', function() {
+			return prepcook.processTemplate(data, templates.nested_template_c)
+				.then(function(tpl) {
+					assert.equal('hi thereBfoobarAfubarFUBAR', tpl); });
 		});
 	});
 });

@@ -135,7 +135,7 @@ var lang = (function languageFactory() {
 	}
 
 
-	function resolveContent (type, data, vars) {
+	function resolveContent (type, data, vars, var_path) {
 		if (type == 'constant' && typeof data !== 'undefined') {
 			return data.trim();
 		}
@@ -147,7 +147,9 @@ var lang = (function languageFactory() {
 						right: ']', 
 						callback: parsetoken.evalCommandBlock
 					}
-				]) 
+					],
+					var_path
+				) 
 				: '';
 		}
 
@@ -155,11 +157,11 @@ var lang = (function languageFactory() {
 	}
 
 
-	function resolveConditional (type, data, vars) {
+	function resolveConditional (type, data, vars, var_path) {
 
 		// Get the definition.
 		var my_word = getWordDefinition(type),
-			my_result = evalConditional(type, data, vars),
+			my_result = evalConditional(type, data, vars, var_path),
 			check_result = true;
 
 		if (my_word.rules) {
@@ -196,7 +198,7 @@ var lang = (function languageFactory() {
 	 * @return {boolean}
 	 *   TRUE if it evaluates to true.
 	 */
-	function evalConditional(type, expression, data) {
+	function evalConditional(type, expression, data, var_path) {
 
 		try {
 			// Since else has no expression, always return true right away.
@@ -207,7 +209,7 @@ var lang = (function languageFactory() {
 
 			// Check for a single variable expression referencing the current base level of data.
 			if (/^([a-z0-9_\-\.]+)+$/i.test(expression)) {
-				var singleExp = parseutil.normalizeExpression(expression, data);
+				var singleExp = parseutil.normalizeExpression(expression, data, var_path);
 				return (singleExp && singleExp !== BISTRO_FAILURE) ? true : false;
 			}
 			// Otherwise, we're dealing with something more complex.
@@ -217,8 +219,8 @@ var lang = (function languageFactory() {
 				}
 				else {
 					var op = (exp[2]) ? exp[2] : null,
-						left = parseutil.normalizeExpression(exp[1], data),
-						right = parseutil.normalizeExpression(exp[3], data); 
+						left = parseutil.normalizeExpression(exp[1], data, var_path),
+						right = parseutil.normalizeExpression(exp[3], data, var_path); 
 
 					if (left === BISTRO_FAILURE || right === BISTRO_FAILURE) {
 						console.warn('One or more vars in expression "' + expression + '" had errors.', left, right);

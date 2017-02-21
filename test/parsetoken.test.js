@@ -10,14 +10,18 @@ describe('Parse Token Module', function() {
 			literal_with_space: '["Hello World"] ',
 			literal_filter_lowercase: '["Hello World"|lowercase]',
 			variable: '[foo]',
-			object_notation: '[bar.baz]'
+			object_notation: '[bar.baz]',
+			object_nested: '[baz]',
+			object_nested_deep: '[d]',
+			object_nested_deep_filter: '[d|uppercase] [e]'
 		};
 
 
 
 		var data = {
 				foo: 'fubar',
-				bar: {baz: 'hi there'}
+				bar: {baz: 'hi there'},
+				a: {b: {c: {d: 'Deep impact!', e: 'Another One'}}}
 			},
 			eval_delimeter_call = [
 				{
@@ -47,10 +51,29 @@ describe('Parse Token Module', function() {
 			assert.equal('hello world', result);
 		});
 
-		it ('Should evaluate a variable.');
+		it ('Should evaluate a variable.', function() {
+			var result = parsetoken.parse(templates.variable, {foo: 'bar'}, eval_delimeter_call, '');
+			assert.equal('bar', result);
+		});
 
-		it ('Should evaluate an object path.');
+		it ('Should evaluate an object path.', function() {
+			var result = parsetoken.parse(templates.object_notation, data, eval_delimeter_call, '');
+			assert.equal('hi there', result);
+		});
 
-		it ('Should evaluate multiple statements');
+		it ('Should evaluate an object by relative path.', function() {
+			var result = parsetoken.parse(templates.object_nested, data, eval_delimeter_call, 'bar');
+			assert.equal('hi there', result);
+		});
+
+		it ('Should evaluate an object by a deep relative path.', function() {
+			var result = parsetoken.parse(templates.object_nested_deep, data, eval_delimeter_call, 'a.b.c');
+			assert.equal('Deep impact!', result);
+		});
+
+		it ('Should evaluate multiple statements', function() {
+			var result = parsetoken.parse(templates.object_nested_deep_filter, data, eval_delimeter_call, 'a.b.c');
+			assert.equal('DEEP IMPACT!Another One', result);
+		});
 	});
 });

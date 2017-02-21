@@ -18,11 +18,14 @@ describe('Parse Utils', function() {
 				literal_number: '"12345"',
 				literal_escaped: '"123\"abc"',
 				variable: 'foo',
-				object_notation: 'bar.baz'
+				object_notation: 'bar.baz',
+				object_nested: 'baz',
+				object_nested_deep: 'd'
 			}, 
 			data = {
 				foo: 'fubar',
-				bar: {baz: 'hi there'}
+				bar: {baz: 'hi there'},
+				a: {b: {c: {d: 'Deep impact!', e: 'Another One'}}}
 			};
 
 		// Expected behavior.
@@ -64,6 +67,16 @@ describe('Parse Utils', function() {
 		});
 		it ('Should identify and replace a variable path with it\'s value.', function() {
 			assert.equal(data.bar.baz, parseutil.normalizeExpression(templates.object_notation, data));
+		});
+
+		it ('Should evaluate an object by relative path.', function() {
+			var result = parseutil.normalizeExpression(templates.object_nested, data, 'bar');
+			assert.equal('hi there', result);
+		});
+
+		it ('Should evaluate an object by a deep relative path.', function() {
+			var result = parseutil.normalizeExpression(templates.object_nested_deep, data, 'a.b.c');
+			assert.equal('Deep impact!', result);
 		});
 
 

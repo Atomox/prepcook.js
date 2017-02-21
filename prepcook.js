@@ -115,9 +115,14 @@ var chef = (function chefFactory() {
 				// Debugger
 //				parse_tree.dump();
 
-				var parsed_tpl = resolveParseTree(parse_tree, data);
-
-				resolve(parsed_tpl);
+				resolveParseTree(parse_tree, data)
+				  .then(function (final_tpl) {
+					resolve(final_tpl);
+				  })
+				  .catch(function (err) {
+				  	console.log('Error resolving parse tree...  ',err);
+				  	reject(err);
+				  });
 			}
 			catch(Error){
 				reject(Error);	
@@ -237,45 +242,6 @@ var chef = (function chefFactory() {
 
 
 	/**
-	 * Given a variable path, resolve it, and return that sub-data.
-	 * 
-	 * @param  {object} vars
-	 *   The template variable object.
-	 * @param  {string} path
-	 *   The path to the current object location, in dot notation.
-	 *   Note: numbers will resolve to the current element in an array.
-	 *  
-	 * @return {mixed}
-	 *   The current sub-object the path points to.
-	 */
-	function resolveVarPath (vars, path) {
-
-		/**
-		 * @todo 
-		 *
-		 * 
-		 *   Handle errors when not found.
-		 * 
-		 */
-
-		if (path.length <= 0) {
-			return vars;
-		}
-
-		var my_path = path.split('.');
-		var tmp = vars;
-
-		for (var i = 0; i < my_path.length; i++) {
-			if (tmp[my_path[i]]) {
-				tmp = tmp[my_path[i]];
-			}
-		}
-
-		return tmp;
-	}
-
-
-	/**
 	 * Travel the parse tree, evaluating each node, and returning the final translation.
 	 * 
 	 * @param  {node} node
@@ -292,173 +258,245 @@ var chef = (function chefFactory() {
 	 */
 	function traverseParseTree (node, vars, curr_path, level, options) {
 
-        if (typeof node === 'undefined') {
-        	console.warn('Cannot resolve undefined parse tree.');
-        }
-        //
-        //   @todo
-        //     node instanceof
-        
-        // Get the sub-set of vars at this current scope.
-        // We pass the entire context array throughout parsing, but a current path pointer (path),
-        // so we can use the current scope for the node we are about to evaluate.
-        var curr_vars = resolveVarPath(vars, curr_path);
-        
-        if (!level) { level = 0; }
-        options = options || {
-        	enable_linked_conditional: false
-        }
-        var children = node.children,
-            offset = Array(level+1).join(' '),
-            result = '',
-            visit_children = true;
-
-        // Check the current node's data, and apply it's data, if applicable.
-        if (!node.data) {
-        	// Do nothing.
-        	options.enable_linked_conditional = false;
-        }
-        else if (lang.isLoader(node.data.type) === true) {
-
-        	// 
-        	// 
-        	// 
-        	// 
-        	// 
-        	// 
-        	// @TODO
-        	// 
-        	//   call 
-        	// 
-        	// 
-        	// 
-        	// 
-        	// 
-        	console.warn ('We\'ve got a loader! --- ', node.data);
-        	var tpl_name = node.data.data.split(':');
-        	console.log(tpl_name);
-        	if (tpl_name[0]) {
-	        	if (vars.__prepcook.templates[tpl_name[0]]) {
-	        		var sub_tpl = vars.__prepcook.templates[tpl_name[0]];
-	        		console.log(sub_tpl);
-
-	        		/**
-	        		 
+		if (typeof node === 'undefined') {
+			console.warn('Cannot resolve undefined parse tree.');
+		}
+		//
+		//   @todo
+		//     node instanceof
+		
+		if (!level) { level = 0; }
+		options = options || {
+			enable_linked_conditional: false
+		}
+		var children = node.children,
+			offset = Array(level+1).join(' '),
+			result = '',
+			visit_children = true,
+			node_resolve = null;
 
 
+		// Check the current node's data, and apply it's data, if applicable.
+		if (!node.data) {
+			// Do nothing.
+			options.enable_linked_conditional = false;
 
-	        		  @TODO
-
-						How do we inject this sub template's promise into the rest of the template parsing?
-
-
-
-
-
-	        		 */
-	        		var sub_template = processTemplate(sub_tpl.vars, sub_tpl.template);
-	        	}
-			}
-
-			//
-			//
-			//
-			//
-			//
-			//
-			// @TODO
-			//
-			//
-			//
-			//
-			//
-			//
-			//
-        }
-        // Do we show the data for this node, or is it a decider for how to show it's children?
-        // Constandants and expressions get evaluated.
-        else if (lang.isConditional(node.data.type) === true) {
-        	visit_children = lang.resolveConditional(node.data.type, node.data.data, curr_vars);
-
-        	if (!visit_children) {
-        		options.enable_linked_conditional = true;	
-        	}
-        	else {
-        		options.enable_linked_conditional = false;
-        	}
-        }
-        else if (lang.isLinkedConditional(node.data.type) === true) {
-
-        	if (options.enable_linked_conditional === true) {
-	        	visit_children = lang.resolveConditional(node.data.type, node.data.data, curr_vars);
-
-	        	// If conditional failed, allow a linked conditional to fire on the next iteration.
-	        	options.enable_linked_conditional = (visit_children === false) ? true : false;
+			// Nothing to add, so resolve empty. 
+			node_resolve = Promise.resolve(result);
+		}
+		else if (lang.isLoader(node.data.type) === true) {
+			var tpl_name = node.data.data.split(':');
+			if (tpl_name[0] && vars.__prepcook.templates[tpl_name[0]]) {
+				var sub_tpl = vars.__prepcook.templates[tpl_name[0]];
+				var sub_tpl_vars = (sub_tpl.vars) ? sub_tpl.vars : vars;
+				node_resolve = processTemplate(sub_tpl_vars, sub_tpl.template);
 			}
 			else {
-				visit_children = false;
+				// Nothing to add, so resolve empty. 
+				node_resolve = Promise.resolve(result);
 			}
-        }
-        else {
-        	if (node.data.type == 'constant' || node.data.type == 'expression') {
-	        	// Expressions shouldn't have children.
-	        	visit_children = false;
-	        	result += lang.resolveContent(node.data.type, node.data.data, curr_vars);
-	        }
+		}
+		else {
+			// Do we show the data for this node, or is it a decider for how to show it's children?
+			// Constandants and expressions get evaluated.
+			if (lang.isConditional(node.data.type) === true) {
+				visit_children = lang.resolveConditional(node.data.type, node.data.data, vars, curr_path);
 
-        	// White space shouldn't change state.
-	        if (node.data.type == 'constant' && node.data.data.trim() == '') {
-	        	// Do not change state for whitespace.
-	        }
-	        else {
-	        	options.enable_linked_conditional = false;	
-	        }
-        }
+				if (!visit_children) {
+					options.enable_linked_conditional = true;	
+				}
+				else {
+					options.enable_linked_conditional = false;
+				}
+			}
+			else if (lang.isLinkedConditional(node.data.type) === true) {
 
-        if (visit_children === true) {
-	        // Loops render their decendants more than once, generally.
-	        if (node.data && lang.isIterator(node.data.type)) {
-	        	if (typeof curr_vars[node.data.data] === 'object') {
-	        		for (var i = 0; i < curr_vars[node.data.data].length; i++) {
-				        for (var j = 0; j < children.length; j++) {
-				            if (children[j]) {
-				            	var my_path = (curr_path) ? curr_path + '.' : '';
-				            	my_path += node.data.data + '.' + i;
-				            	var temp_result = traverseParseTree(children[j], vars, my_path, (level+1), options);
-				            	result += temp_result.result;
-				            	options = temp_result.options;
-				            }
-				            else {
-				            	console.warn('No Children in loop for: ', node.data.type);
-				            }
-				        }        			
-	        		}
-	        	}
-	        }
-	        // Non-Loops only render once.
-	        else {
-		        for (var j = 0; j < children.length; j++) {
-		            if (children[j]) {
-		                var temp_result = traverseParseTree(children[j], vars, curr_path, (level+1), options);
-		            	result += temp_result.result;
-		            	options = temp_result.options;
-		            }
-		        }
-	        }
+				if (options.enable_linked_conditional === true) {
+					visit_children = lang.resolveConditional(node.data.type, node.data.data, vars, curr_path);
 
-	        // We will never be in this block if enable_linked_conditional was still TRUE,
-	        // so protect this state in children from their parents.
-	        options.enable_linked_conditional = false;
-	    }
+					// If conditional failed, allow a linked conditional to fire on the next iteration.
+					options.enable_linked_conditional = (visit_children === false) ? true : false;
+				}
+				else {
+					visit_children = false;
+				}
+			}
+			else {
+				if (node.data.type == 'constant' || node.data.type == 'expression') {
 
-	    if (level === 0) {
-	    	return result;
-	    }
+					// Expressions shouldn't have children.
+					visit_children = false;
+					result += lang.resolveContent(node.data.type, node.data.data, vars, curr_path);
+				}
 
-		return {
-			result: result,
-			options: options
-		};
+				// White space shouldn't change state.
+				if (node.data.type == 'constant' && node.data.data.trim() == '') {
+					// Do not change state for whitespace.
+				}
+				else {
+					options.enable_linked_conditional = false;	
+				}
+			}
+
+			// Resolve any result that didn't need a promise. 
+			node_resolve = Promise.resolve(result);
+		}
+
+
+		// Return a promise, which will evaluate any children, and resolve the final result.
+		return new Promise(function(resolve, reject) {
+
+			var child_step_resolve = new Promise(function(resolve, reject) {
+
+				node_resolve.then(function(result) {
+
+					var children_resolve = [];
+					children_resolve[0] = Promise.resolve({result: result, options: options});
+
+
+					if (visit_children === true) {
+						// Loops render their decendants more than once, generally.
+						if (node.data && lang.isIterator(node.data.type)) {
+							curr_vars = parseutil.resolveVarPath(vars, curr_path);
+
+							if (typeof curr_vars[node.data.data] !== 'object') {
+								throw new Error('Found iterator on non-object. ' + node.data.data);
+							}
+
+							var grandchildren_resolve = [];
+
+							for (var i = 0; i < curr_vars[node.data.data].length; i++) {
+
+								children_resolve[i+1] = new Promise(function(resolve, reject) {
+									var my_i = i;
+
+									// Don't resolve the next child until we have the context of the previous.
+									children_resolve[my_i].then(function(prev_result) {
+
+										grandchildren_resolve[0] = Promise.resolve(prev_result);
+
+										for (var j = 0; j < children.length; j++) {
+
+											grandchildren_resolve[j+1] = new Promise(function(resolve, reject) {
+												// Maintain the state of i and j when this was called.
+												var my_j = j,
+													my_parent_i = my_i;
+
+												// Once our previous sibling completed, fire ours.
+												grandchildren_resolve[my_j].then(function(prev_result) {
+													if (children[my_j]) {
+
+														var my_path = (curr_path) ? curr_path + '.' : '';
+														my_path += node.data.data + '.' + my_parent_i;
+														var my_child_call = traverseParseTree(children[my_j], vars, my_path, (level+1), prev_result.options);
+
+														my_child_call.then(function(temp_result){
+															resolve({
+																result: prev_result.result + temp_result.result,
+																options: temp_result.options
+															});
+														}).catch(function(err) {
+															reject('Error resolving iterator grandchild.', err);
+														});
+													}
+													else {
+														reject('No Children in loop for: ', node.data.type);
+													}
+												});
+											});
+										}
+
+										// Finalize a complete branch of children's children, and return only a single result.
+										Promise.all(grandchildren_resolve).then(function(gc_results){
+											var final = gc_results[gc_results.length-1];
+											resolve(final);
+										}).catch(function(err){
+											console.warn('Error parsing children results of an iterator.', err);
+											reject(err);
+										});
+									}).catch(function(err) {
+										console.warn('Error in out iterator loop: ', err);
+										reject(err);
+									});
+								});
+							}
+						}
+						// Non-Loops only render once.
+						else {
+							for (var j = 0; j < children.length; j++) {
+								// Return a promise for each element, and don't fire them until the last child is complete, 
+								// since we need to build off their state.
+								// The first time through, we auto-resolve a promise containing the results from the parent node.
+								children_resolve[j+1] = new Promise(function(resolve, reject) {
+									var my_j = j;
+
+									// Don't resolve the next child until we have the context of the previous.
+									children_resolve[my_j].then(function(prev_result) {
+
+										if (children[my_j]) {
+											var my_child_call = traverseParseTree(children[my_j], vars, curr_path, (level+1), prev_result.options);
+											
+											my_child_call.then(function (temp_result) {
+												resolve({
+													result: prev_result.result + temp_result.result,
+													options: temp_result.options
+												});
+											}).catch(function(err){
+												reject(err);
+											});
+										}
+										else {
+											reject('Children not set when detected on node.');
+										}
+									}).catch(function(err){
+										reject(err);
+									});
+								});
+							}
+						}
+
+						// When all children are done, then update some settings, and return only the cumlitative result.
+						Promise.all(children_resolve).then(function(child_results) {
+
+							// Get the final result (the last promise).
+							var final = child_results[child_results.length-1];
+
+							// We will never be in this block if enable_linked_conditional was still TRUE,
+							// so protect this state in children from their parents.
+							final.options.enable_linked_conditional = false;
+							resolve(final);
+
+						}).catch(function(err){
+							reject(err);
+						});
+					}
+					// No children, so just resolve the parents.
+					else {
+						resolve({
+							result: result,
+							options: options
+						});
+					}
+				});
+			});
+
+
+			// Finalize everything, and resolve the promise we returned.
+			child_step_resolve.then(function(child_results) {
+				if (level === 0) {
+					resolve(child_results.result);
+				}
+				else {
+					resolve ({
+						result: child_results.result,
+						options: child_results.options
+					});	
+				}
+			}).catch(function(err){
+				console.warn('Error finalizing final resolve step in traverseParseTree.', err);
+				reject(err);
+			});
+		});
 	}
 
 
