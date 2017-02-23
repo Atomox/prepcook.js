@@ -183,6 +183,23 @@ describe('Prepcook Module', function() {
 		});
 
 
+		/**
+		 *
+		 *  Nested Templates.
+		 *
+		 */ 
+		it ('Should allow subtemplates without an independant data source.', function() {
+			var data = {
+				a: '',
+				b: '',
+				c: '',
+			};
+			var my_data = prepcook.bindSubTemplate(data, 'content', templates.if_true);
+			assert.equal(data.__prepcook.templates.content.template, templates.if_true);
+		});
+
+		it ('Should allow subtemplates to execute without an independant data source.');
+
 		it ('Should eval a nested template.', function() {
 			return prepcook.processTemplate(data, templates.nested_template)
 				.then(function(tpl) {

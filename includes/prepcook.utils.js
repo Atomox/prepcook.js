@@ -300,7 +300,7 @@ var server_utils = (function utils() {
 	 * @return {mixed|Failure}
 	 *   The normalized value, or failure.
 	 */
-	function normalizeExpression(exp, data, var_path) {
+	function normalizeExpression(exp, data, var_path, supress_warnings) {
 
 		var scope_offset = 0;
 
@@ -333,13 +333,17 @@ var server_utils = (function utils() {
 				else {exp = data; } 
 			}
 			else if (typeof data !== 'object' || data === null) { 
-				console.warn('Expression appears to depend upon data, Expected as object, but found', typeof data, '.'); 
+				if (!supress_warnings) {
+					console.warn('Expression appears to depend upon data, Expected as object, but found', typeof data, '.'); 
+				}
 				exp = BISTRO_FAILURE;
 			}
 			else if (obj_path = exp.match(regex_path)) { exp = getObjectPath(exp, data); }
 			else if (data[exp]) { exp = data[exp]; }
 			else { 
-				console.warn('Expression "' + exp + '" could not be evaluated.');
+				if (!supress_warnings) {
+					console.warn('Expression "' + exp + '" could not be evaluated.');
+				}
 				exp = BISTRO_FAILURE;
 			}
 		}

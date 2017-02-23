@@ -55,10 +55,17 @@ var chef = (function chefFactory() {
 
 		data = prepcookPrepareData(data);
 
-		data.__prepcook.templates[name] = {
-			template: tpl,
-			vars: vars
-		};
+		if (typeof vars !== 'undefined') {
+			data.__prepcook.templates[name] = {
+				template: tpl,
+				vars: vars
+			};
+		}
+		else {
+			data.__prepcook.templates[name] = {
+				template: tpl
+			};	
+		}
 
 		return data;
 	}

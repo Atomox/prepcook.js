@@ -209,7 +209,7 @@ var lang = (function languageFactory() {
 
 			// Check for a single variable expression referencing the current base level of data.
 			if (/^([a-z0-9_\-\.]+)+$/i.test(expression)) {
-				var singleExp = parseutil.normalizeExpression(expression, data, var_path);
+				var singleExp = parseutil.normalizeExpression(expression, data, var_path, true);
 				return (singleExp && singleExp !== BISTRO_FAILURE) ? true : false;
 			}
 			// Otherwise, we're dealing with something more complex.
@@ -219,8 +219,8 @@ var lang = (function languageFactory() {
 				}
 				else {
 					var op = (exp[2]) ? exp[2] : null,
-						left = parseutil.normalizeExpression(exp[1], data, var_path),
-						right = parseutil.normalizeExpression(exp[3], data, var_path); 
+						left = parseutil.normalizeExpression(exp[1], data, var_path, true),
+						right = parseutil.normalizeExpression(exp[3], data, var_path, true); 
 
 					if (left === BISTRO_FAILURE || right === BISTRO_FAILURE) {
 						console.warn('One or more vars in expression "' + expression + '" had errors.', left, right);

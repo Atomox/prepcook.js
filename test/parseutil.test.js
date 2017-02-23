@@ -117,15 +117,6 @@ describe('Parse Utils', function() {
 			assert.equal('#each', parseutil.firstOccuring(['#each', '#elseif', '#if'], 'hello #each #elseif world #else'));
 		});
 
-		/**
-		   @TODO
-		 */
-		it ('Should not return #else if #elseif comes first.'); 
-/**
-		, function() {
-			assert.equal('#elseif', parseutil.firstOccuring(['#else', '#elseif', '#if'], 'hello #elseif world #else'));
-		});
-*/
 		it ('Should return nothing when no match is found.');
 	});
 
