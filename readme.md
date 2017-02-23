@@ -11,7 +11,8 @@ Templating based on concepts from handlebars.js and angular.js.
 ## Updates: 
 0.4.0
 * We heard you like templates. Now you can put a [template inside your template](https://github.com/Atomox/prepcook.js/issues/3).
-* Steps towards var path evaluating, so ../ notation for variables is coming.
+  * Pass your own scope variable, or maintain the current scope/data from the place/time it's called.
+* Travarse up the scope chain for a var using: ../, like `../../foo.bar`. (Finds foo.bar starting two directories up.)
 * More "async" handling of template evaluation. Not really, but lots of promises.
 * New tests.
 
@@ -66,6 +67,7 @@ Or chain them, as you would in any language.
 	{{ /else }}
 ```
 
+
 ### Loops
 Loop over the elements of an array, easily.
 
@@ -103,6 +105,28 @@ Assume `var foo = ['foo', 'bar', 'baz'];`
 /Object looping is not currently supported, but [it's coming](https://github.com/Atomox/prepcook.js/issues/9)./
 
 
+### Change Scope
+
+```
+// Our data:
+{
+	foo: {
+		bar: {	a: 'Hi there' },
+		baz: {	a: 'Winter is Coming' }
+	}
+}
+```
+
+```
+// Our Template
+{{ #each foo.bar }}
+	// Hi there
+	{{ [a] }}
+
+	// Winter is coming
+	{{ [../baz.a] }}
+{{ }}
+
 
 ### Angular-style Filters:
 
@@ -135,23 +159,47 @@ Output a variable in JSON format.
 
 
 ### Nest templates:
-You can nest templates in PrepCook.js.
-
-```
-// Attach a nested template to the data.
-prepcook.bindSubTemplate(master_tpl_data, 'the_template_name', the_template, the_data);
-
-```
-Pass: `the master template's data`, `reference name for your nested template`, `the actual template String`, `any data it needs`,
-
-After that, reference it in your template:
+Reference one template inside another:
 
 ```
 	{{#template template_ref_name}}
 ```
-If you passed a data array during binding, that will be used when evaluating your sub template. Otherwise, the master template's data will be assumed.
 
-When you don't set data for the subtemplate, not only will the master data be passed, but so will it's current scope.
+Setup just requires binding the templates before you render the master template:
+
+```
+// The template data you were gonna render anyway.
+var kingdom_template = '<h1>Welcome to the {{[location]}}</h1>, but {{ #template another_castle_tpl /template }}';
+var kingdom_data = { name: 'Mario', location: 'Mushroom Kingdom', other: 'castle'};
+
+// Your nested template.
+var castle_tpl = "Your princess is in {{ [other] }}";
+
+// Attach a nested template.
+prepcook.bindSubTemplate(kingdom_data, 'another_castle_tpl', castle_tpl);
+```
+
+```
+// Then render the main template as normal, using the master_data as you data variable.
+var output = prepcook.processTemplate(kingdom_data, kingdom_template);
+
+```
+That's it!
+
+
+Want to pass data just for your nested template? Maybe header or footer data? No problem!
+```
+var castle_data = { other: 'castle' };  // This one's optional!
+
+// Attach it like before.
+prepcook.bindSubTemplate(kingdom_data, 'another_castle_tpl', castle_tpl, castle_data);
+```
+
+Passed data at binding time always takes precidence. Otherwise, the master template's data will be assumed.
+When you rely on the default data, we'll pass it to your template with it's current scope.
+
+E.G. If you #template is referenced when the parent template's scope is at: 'foo.bar', then your template will start at the same scope, foo.bar.
+/(Remember, you can always use '../' to get higher in the scope.)/
 
 ```
 // Master template
@@ -221,9 +269,11 @@ Dependencies for node generally go in your project, under `/node_modules/[module
 
 ## Updates: 
 0.4.0
-* Template Nesting.
-* Sub tree rendering now split up "asynchroniously."
-* Work towards scope traversal. Foundation for '../' variable operator.
+* We heard you like templates. Now you can put a [template inside your template](https://github.com/Atomox/prepcook.js/issues/3).
+  * Pass your own scope variable, or maintain the current scope/data from the place/time it's called.
+* Travarse up the scope chain for a var using: ../, like `../../foo.bar`. (Finds foo.bar starting two directories up.)
+* More "async" handling of template evaluation. Not really, but lots of promises.
+* New tests.
 
 0.3.0
 * npm install from scratch now working after [initial dependencies issues](https://github.com/Atomox/prepcook.js/issues/4).
