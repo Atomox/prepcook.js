@@ -10,9 +10,9 @@ Templating based on concepts from handlebars.js and angular.js.
 
 ## Updates: 
 0.4.0
-* We heard you like templates. Now you can put a [template inside your template](https://github.com/Atomox/prepcook.js/issues/3).
+* We heard you like templates. Now you can put a [template inside your template](https://github.com/Atomox/prepcook.js/issues/3), using **`#template`**.
   * Pass your own scope variable, or maintain the current scope/data from the place/time it's called.
-* Travarse up the scope chain for a var using: ../, like `../../foo.bar`. (Finds foo.bar starting two directories up.)
+* Travarse up the scope chain for a var using: **`../`**, like `../../foo.bar`. (Finds foo.bar starting two levels up.)
 * More "async" handling of template evaluation. Not really, but lots of promises.
 * New tests.
 
@@ -102,7 +102,7 @@ Assume `var foo = ['foo', 'bar', 'baz'];`
 	{{ /each }}
 ```
 
-/Object looping is not currently supported, but [it's coming](https://github.com/Atomox/prepcook.js/issues/9)./
+*Object looping is not currently supported, but [it's coming](https://github.com/Atomox/prepcook.js/issues/9).*
 
 
 ### Change Scope
@@ -125,7 +125,8 @@ Assume `var foo = ['foo', 'bar', 'baz'];`
 
 	// Winter is coming
 	{{ [../baz.a] }}
-{{ }}
+{{ /each }}
+```
 
 
 ### Angular-style Filters:
