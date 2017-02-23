@@ -35,6 +35,7 @@ First, ```npm install prepcook.js``` (see [Dependencies](#manual-dependency-setu
 		});
 ```
 
+
 ## The Language
 
 ### Simple code, with formatting:
@@ -48,6 +49,8 @@ First, ```npm install prepcook.js``` (see [Dependencies](#manual-dependency-setu
 		{{ [body] }}
 	</p>
 ```
+
+
 
 ### Conditionals
 ```
@@ -66,6 +69,7 @@ Or chain them, as you would in any language.
 		A girl has no name.
 	{{ /else }}
 ```
+
 
 
 ### Loops
@@ -105,6 +109,7 @@ Assume `var foo = ['foo', 'bar', 'baz'];`
 *Object looping is not currently supported, but [it's coming](https://github.com/Atomox/prepcook.js/issues/9).*
 
 
+
 ### Change Scope
 You can easily change the scope of your template object. Just prepend any variable with **`../`**
 
@@ -134,6 +139,7 @@ You can use it once, or chain them, just like in any shell (like BASH or DOS). B
 These are OK: `../../../foo.bar`, `../foo`, `../bar.baz`. This is not: `foo../bar`. But you wouldn't do that.
 
 
+
 ### Angular-style Filters:
 
 Inspired by Angular, you can apply filters to your variables or literals before outputting them. Just add a pipe `|` to the end of your variable:
@@ -147,7 +153,7 @@ You can even add your own!
 
 
 ``` 
-	[var|currency:USD]
+	[../the.money.stuff|currency:USD]
 ```
 
 Output a variable, formatted in US Dollars.
@@ -159,12 +165,13 @@ Output a string in all lowercase. Also try `[string|uppercase]`.
 
 
 ```
-	[var|JSON]
+	[a_cool_object|JSON]
 ```
 Output a variable in JSON format.
 
 
-### Nest templates:
+
+## Nest templates:
 Reference one template inside another:
 
 ```
@@ -175,7 +182,8 @@ Setup just requires binding the templates before you render the master template:
 
 ```
 // The template data you were gonna render anyway.
-var kingdom_template = '<h1>Welcome to the {{[location]}}</h1>, but {{ #template another_castle_tpl /template }}';
+var kingdom_template = '<h1>Welcome to the {{[location]}}</h1>,'
+	+ 'but {{ #template another_castle_tpl /template }}';
 var kingdom_data = { name: 'Mario', location: 'Mushroom Kingdom', other: 'castle'};
 
 // Your nested template.
@@ -254,9 +262,11 @@ Reference like follows:
 `[foo.bar.baz]` outputs 123. `#each people` exposes [first] inside of it.
 
 
+
 ## Tests in Mocha
 
 We use Mocha to run tests to make sure the components are working together as expected. Currently, you'll need to install mocha yourself, then run: `npm test` in the prepcook.js directory.
+
 
 
 ## Manual Dependency Setup
@@ -267,11 +277,12 @@ We use Mocha to run tests to make sure the components are working together as ex
 Dependencies for node generally go in your project, under `/node_modules/[module_name_here]`. See "Loading from 'node_modules' Folders" in the [Node Modules](https://nodejs.org/docs/v0.4.1/api/modules.html) documentation.
 
 
+
 ## TODO
-1. `#each` should be able to view data outside of it's scope, using `../`
-	a. Instead of passing the object subtree to #each, we should pass the original object, and a current path string. Think PWD in BASH.
-2. Can we add an #async or #lazy command, which loads it's subtree after passing to the browser? It could set proper placeholders/ids, and attach the approprate JS along with the template in order to facilitate AJAX calls when the page loads.
-3. Performance check.
+1. Can we add an #async or #lazy command, which loads it's subtree after passing to the browser? It could set proper placeholders/ids, and attach the approprate JS along with the template in order to facilitate AJAX calls when the page loads.
+2. Performance check.
+
+
 
 ## Updates: 
 0.4.0
