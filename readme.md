@@ -67,6 +67,8 @@ Or chain them, as you would in any language.
 ```
 
 ### Loops
+Loop over the elements of an array, easily.
+
 ```
 	<ul>
 		{{ #each people }}
@@ -97,6 +99,10 @@ Assume `var foo = ['foo', 'bar', 'baz'];`
 		{{ [.] }}
 	{{ /each }}
 ```
+
+/Object looping is not currently supported, but [it's coming](https://github.com/Atomox/prepcook.js/issues/9)./
+
+
 
 ### Angular-style Filters:
 
@@ -133,7 +139,7 @@ You can nest templates in PrepCook.js.
 
 ```
 // Attach a nested template to the data.
-prepcook.bindSubTemplate(outer_tpl_data, 'template_ref_name', the_template, mod_data);
+prepcook.bindSubTemplate(master_tpl_data, 'the_template_name', the_template, the_data);
 
 ```
 Pass: `the master template's data`, `reference name for your nested template`, `the actual template String`, `any data it needs`,
@@ -144,6 +150,25 @@ After that, reference it in your template:
 	{{#template template_ref_name}}
 ```
 If you passed a data array during binding, that will be used when evaluating your sub template. Otherwise, the master template's data will be assumed.
+
+When you don't set data for the subtemplate, not only will the master data be passed, but so will it's current scope.
+
+```
+// Master template
+{{ #each people }}
+	{{ #template my_person_tpl /template }}
+{{ /each }}
+
+// Sub template 'my_person_tpl'
+
+<p> // This references each element of people in the master template.
+	{{ [first_name] }} {{ [last_name] }}
+}
+</p>
+```
+
+But, if you bind your own template's data, then it will refer to that data, even if it has the same name.
+
 
 
 ### Just pass in a context:

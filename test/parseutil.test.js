@@ -20,11 +20,15 @@ describe('Parse Utils', function() {
 				variable: 'foo',
 				object_notation: 'bar.baz',
 				object_nested: 'baz',
+				object_nested_change_scope_op: '../foo',
+				object_nested_change_scope_op_deep: '../../../foo',
 				object_nested_deep: 'd'
 			}, 
 			data = {
 				foo: 'fubar',
-				bar: {baz: 'hi there'},
+				bar: {
+					baz: 'hi there'
+				},
 				a: {b: {c: {d: 'Deep impact!', e: 'Another One'}}}
 			};
 
@@ -78,6 +82,18 @@ describe('Parse Utils', function() {
 			var result = parseutil.normalizeExpression(templates.object_nested_deep, data, 'a.b.c');
 			assert.equal('Deep impact!', result);
 		});
+
+
+		it ('Should resolve a scope change operator.', function() {
+			var result = parseutil.normalizeExpression(templates.object_nested_change_scope_op, data, 'bar');
+			assert.equal('fubar', result);
+		});
+
+		it ('Should resolve a deeply nested scope change operator.', function() {
+			var result = parseutil.normalizeExpression(templates.object_nested_change_scope_op_deep, data, 'a.b.c');
+			assert.equal('fubar', result);
+		});
+		
 
 
 		// Errors

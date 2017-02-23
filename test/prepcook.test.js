@@ -26,11 +26,12 @@ describe('Prepcook Module', function() {
 			each_nested: '{{ #each people #each name }}{{[.]}}{{ /each /each }}',
 			object_notation: '[bar.baz]',
 			complex: '{{ #each a }}{{ [.] }}{{/each }}' + '{{ #if a }}A{{#elif b}}B{{ #else }}C{{ /else }}',
-			nested_template: '{{ [bar.baz] }} {{ #template my_temp:data }} {{[foo|uppercase]}}',
-			nested_template_b: '{{ [bar.baz] }} {{ #template my_other_temp:data }} {{[foo|uppercase]}}',
-			nested_template_c: '{{ [bar.baz] }} {{ #template my_temp:data }} {{ #template my_other_temp:data }} {{[foo|uppercase]}}'
+			nested_template: '{{ [bar.baz] }} {{ #template my_temp }} {{[foo|uppercase]}}',
+			nested_template_b: '{{ [bar.baz] }} {{ #template my_other_temp }} {{[foo|uppercase]}}',
+			nested_template_c: '{{ [bar.baz] }} {{ #template my_temp }} {{ #template my_other_temp }} {{[foo|uppercase]}}',
+			nested_template_d: '{{ [bar.baz] }} {{ #each one #each two }} {{ #template my_third_template /template }} {{ /each /each }} {{[foo|uppercase]}}',
+			nested_path_template: '{{[a]}} {{ [b|lowercase]}} {{[c]}}'
 		};
-
 
 
 		var data = {
@@ -44,6 +45,13 @@ describe('Prepcook Module', function() {
 			a: true,
 			b: true,
 			c: true,
+			one: [{
+				two: [{
+					a: 'A',
+					b: 'B',
+					c: 'C'
+				}]
+			}],
 			__prepcook:{
 				templates: {
 					my_temp: {
@@ -63,6 +71,9 @@ describe('Prepcook Module', function() {
 					},
 					my_other_temp: {
 						template: templates.if_elif_else + '{{[foo]}}'
+					},
+					my_third_template: {
+						template: templates.nested_path_template
 					}
 				}
 			}
@@ -80,8 +91,8 @@ describe('Prepcook Module', function() {
 					assert.equal(tpl, templates.basic); });
 		});
 
-		// Simple Templates
 
+		// Simple Templates
 		it ('Should parse simple templates.', function() {
 			return prepcook.processTemplate({}, templates.literal)
 				.then(function(tpl) { 
@@ -194,6 +205,12 @@ describe('Prepcook Module', function() {
 			return prepcook.processTemplate(data, templates.nested_template_c)
 				.then(function(tpl) {
 					assert.equal('hi thereBfoobarAfubarFUBAR', tpl); });
+		});
+
+		it ('Should eval a var path for a nested template without a dedicated var object.', function(){
+			return prepcook.processTemplate(data, templates.nested_template_d)
+				.then(function(tpl) {
+					assert.equal('hi thereAbCFUBAR', tpl); });
 		});
 	});
 });

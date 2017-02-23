@@ -190,6 +190,46 @@ var server_utils = (function utils() {
 
 
 	/**
+	 * Given an expression, check for operators, like scope traversal. (../)
+	 * 
+	 * @param  {string} exp
+	 *   A simple variable expression, which could reference a variable, and optional operators.
+	 * 
+	 * @return {object}
+	 *   exp: final expression,
+	 *   scope_offset: (int) number of levels below current scope where this variable should is expected to live.
+	 */
+	function resolveExpressionOperators (exp) {
+		if (typeof exp === 'number' || typeof exp === 'boolean') {
+			return;
+		}
+		if (typeof exp !== 'string') {
+			throw new Error('Invalid expression. Expected string, but found ' + typeof exp);
+		}
+		else if (exp.length <= 0 || exp === null) {
+			throw new Error('Cannot evaluate empty expression.');
+		}
+
+		var tmp = exp,
+			back_levels = 0,
+			traverse_expression = /((?:\.{2}\/)+)((?:[a-z0-9_\-]+)*(?:\.[a-z0-9_\-]+){0,})/ig
+
+		// Search for "down one level" (../) operator at the beginning of the path.
+		if (my_match = traverse_expression.exec(exp)) {
+			if (typeof my_match[2] !== 'undefined') {
+				tmp = my_match[2];
+				back_levels = my_match[1].length/3;
+			}
+		}
+
+		return {
+			exp: tmp,
+			scope_offset: back_levels
+		}
+	}
+
+
+	/**
 	 * Given a variable path, resolve it, and return that sub-data.
 	 * 
 	 * @param  {object} vars
@@ -197,26 +237,42 @@ var server_utils = (function utils() {
 	 * @param  {string} path
 	 *   The path to the current object location, in dot notation.
 	 *   Note: numbers will resolve to the current element in an array.
-	 *  
+	 * @param  {int} scope_offset
+	 *   Number of levels above current path where we should resolve the scope.
+	 * 
 	 * @return {mixed}
 	 *   The current sub-object the path points to.
 	 */
-	function resolveVarPath (vars, path) {
+	function resolveVarPath (vars, path, scope_offset) {
+		if (path.length <= 0 || path === null) {
+			return vars;
+		}
 
 		if (typeof vars !== 'object' || vars === null) {
 			throw new Error('Cannot resolve path for non-object.');
 		}
-		else if (typeof path !== 'string') {
+		else if (typeof path !== 'string' && path !== null) {
 			throw new Error('Cannot resolve non-string path.');
 		}
 
-		if (path.length <= 0) {
-			return vars;
-		}
-
-		var my_path = path.split('.');
 		var tmp = vars;
 
+		// Split the path into levels.
+		var my_path = path.split('.');
+
+		// Traverse the level of our path, up (scope_offset) levels.
+		if (scope_offset > 0) {
+			for (var i = 0; i < scope_offset; i++) {
+				if (my_path.length > 0) {
+					my_path.pop();
+				}
+				else {
+					throw new Error('Out of bound exception for ../ operator. Requested: ' + scope_offset +', available length: ' + my_path.length);
+				}
+			}
+		}
+		
+		// Search our vars for the specified level.
 		for (var i = 0; i < my_path.length; i++) {
 			if (tmp[my_path[i]]) {
 				tmp = tmp[my_path[i]];
@@ -246,11 +302,18 @@ var server_utils = (function utils() {
 	 */
 	function normalizeExpression(exp, data, var_path) {
 
+		var scope_offset = 0;
+
+		if (exp_res = resolveExpressionOperators(exp)) {
+			exp = exp_res.exp;
+			scope_offset = exp_res.scope_offset;
+		}
+
 		// Get the sub-set of vars at this current scope.
 		// We pass the entire context array throughout parsing, but a current path pointer (path),
 		// so we can use the current scope for the expression we are about to evaluate.
 		if (typeof var_path === 'string' && typeof data === 'object') {
-			var data = resolveVarPath(data, var_path);
+			var data = resolveVarPath(data, var_path, scope_offset);
 		}
 
 		var regex_path = /^([a-z][_\-a-z0-9]+)\.(([a-z][_\-a-z0-9]+)\.?)+$/i,

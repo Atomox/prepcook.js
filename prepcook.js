@@ -100,14 +100,18 @@ var chef = (function chefFactory() {
 	 *   A set of data we should pass to the callback for contextual evaluating of any matched blocks.
 	 * @param  {string} template
 	 *   A string of data we should parse.
+	 * @param  {string} path
+	 *   An optional path pointing to a variable position within data. If passed, we'll start there,
+	 *   instead of at the base.
 	 *   
 	 * @return {string}
 	 *   A promise, which will resolve with the template, with all blocks evaluated.
 	 */
-	function processTemplate(data, template) {
+	function processTemplate(data, template, path) {
 
 		return new Promise(function (resolve, reject) {
 			try {
+				var my_path = path;
 
 				// Convert the template to a tree structure.
 				var parse_tree = parseTree(template);
@@ -115,7 +119,7 @@ var chef = (function chefFactory() {
 				// Debugger
 //				parse_tree.dump();
 
-				resolveParseTree(parse_tree, data)
+				resolveParseTree(parse_tree, data, my_path)
 				  .then(function (final_tpl) {
 					resolve(final_tpl);
 				  })
@@ -236,8 +240,9 @@ var chef = (function chefFactory() {
 	 * @return {string}
 	 *   The final template, translated into normal HTML.
 	 */
-	function resolveParseTree (tree, data) {
-		return traverseParseTree(tree.root(), data, '');
+	function resolveParseTree (tree, data, path) {
+		if (!path) { path = ''; }
+		return traverseParseTree(tree.root(), data, path);
 	}
 
 
@@ -289,7 +294,14 @@ var chef = (function chefFactory() {
 			if (tpl_name[0] && vars.__prepcook.templates[tpl_name[0]]) {
 				var sub_tpl = vars.__prepcook.templates[tpl_name[0]];
 				var sub_tpl_vars = (sub_tpl.vars) ? sub_tpl.vars : vars;
-				node_resolve = processTemplate(sub_tpl_vars, sub_tpl.template);
+				var sub_tpl_path = null;
+				if (typeof tpl_name[1] !== 'undefined' && tpl_name[1] !== null) {
+					sub_tpl_path = tpl_name[1];
+				}
+				else if (typeof sub_tpl.vars === 'undefined') {
+					sub_tpl_path = curr_path;
+				}
+				node_resolve = processTemplate(sub_tpl_vars, sub_tpl.template, sub_tpl_path);
 			}
 			else {
 				// Nothing to add, so resolve empty. 
@@ -347,7 +359,7 @@ var chef = (function chefFactory() {
 		return new Promise(function(resolve, reject) {
 
 			var child_step_resolve = new Promise(function(resolve, reject) {
-
+				var my_path = curr_path;
 				node_resolve.then(function(result) {
 
 					var children_resolve = [];
@@ -357,14 +369,20 @@ var chef = (function chefFactory() {
 					if (visit_children === true) {
 						// Loops render their decendants more than once, generally.
 						if (node.data && lang.isIterator(node.data.type)) {
-							curr_vars = parseutil.resolveVarPath(vars, curr_path);
+							curr_vars = parseutil.resolveVarPath(vars, my_path);
 
-							if (typeof curr_vars[node.data.data] !== 'object') {
-								throw new Error('Found iterator on non-object. ' + node.data.data);
+							if (typeof curr_vars[node.data.data] === 'undefined' || curr_vars[node.data.data] === null) {
+								reject('Found iterator on non-object. ' + node.data.data);
 							}
 
 							var grandchildren_resolve = [];
 
+							/**
+							   
+							   @TODO
+							   		Convert to syntax:
+ 									for ... in
+							 */
 							for (var i = 0; i < curr_vars[node.data.data].length; i++) {
 
 								children_resolve[i+1] = new Promise(function(resolve, reject) {
@@ -386,9 +404,10 @@ var chef = (function chefFactory() {
 												grandchildren_resolve[my_j].then(function(prev_result) {
 													if (children[my_j]) {
 
-														var my_path = (curr_path) ? curr_path + '.' : '';
-														my_path += node.data.data + '.' + my_parent_i;
-														var my_child_call = traverseParseTree(children[my_j], vars, my_path, (level+1), prev_result.options);
+														var my_var_path = (my_path) ? my_path + '.' : '';
+														my_var_path += node.data.data + '.' + my_parent_i;
+
+														var my_child_call = traverseParseTree(children[my_j], vars, my_var_path, (level+1), prev_result.options);
 
 														my_child_call.then(function(temp_result){
 															resolve({
@@ -434,7 +453,7 @@ var chef = (function chefFactory() {
 									children_resolve[my_j].then(function(prev_result) {
 
 										if (children[my_j]) {
-											var my_child_call = traverseParseTree(children[my_j], vars, curr_path, (level+1), prev_result.options);
+											var my_child_call = traverseParseTree(children[my_j], vars, my_path, (level+1), prev_result.options);
 											
 											my_child_call.then(function (temp_result) {
 												resolve({
