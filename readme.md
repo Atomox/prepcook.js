@@ -106,6 +106,7 @@ Assume `var foo = ['foo', 'bar', 'baz'];`
 
 
 ### Change Scope
+You can easily change the scope of your template object. Just prepend any variable with **`../`**
 
 ```
 // Our data:
@@ -127,6 +128,10 @@ Assume `var foo = ['foo', 'bar', 'baz'];`
 	{{ [../baz.a] }}
 {{ /each }}
 ```
+
+You can use it once, or chain them, just like in any shell (like BASH or DOS). But please, no spaces. And keep them to the start of an expression.
+
+These are OK: `../../../foo.bar`, `../foo`, `../bar.baz`. This is not: `foo../bar`. But you wouldn't do that.
 
 
 ### Angular-style Filters:
