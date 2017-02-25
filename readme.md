@@ -9,10 +9,9 @@ Templating based on concepts from handlebars.js and angular.js.
 [![Build Status](https://travis-ci.org/Atomox/prepcook.js.svg?branch=master)](https://travis-ci.org/Atomox/prepcook.js)
 
 ## Updates: 
-0.4
-* We heard you like templates. Now you can put a [template inside your template](https://github.com/Atomox/prepcook.js/issues/3), using **`#template`**.
-  * Pass your own scope variable, or maintain the current scope/data from the place/time it's called.
-* Include css & JS files: `{{#include css|my_file_nickname /include}}`
+0.4.x
+* We heard you like templates. Now you can put a [template inside your template](https://github.com/Atomox/prepcook.js/issues/3). Just call, **`#template`**. You even have multiple scope options.
+* Include CSS & JS files: `{{#include css|my_file_nickname /include}}`
 * Travarse up the scope chain for a var using: **`../`**, like `../../foo.bar`. (Finds foo.bar starting two levels up.)
 * More "async" handling of template evaluation. Not really, but lots of promises.
 * New tests.
