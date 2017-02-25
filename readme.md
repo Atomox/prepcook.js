@@ -11,8 +11,8 @@ Templating based on concepts from handlebars.js and angular.js.
 ## Updates: 
 0.4.x
 * We heard you like templates. Now you can put a [template inside your template](https://github.com/Atomox/prepcook.js/issues/3). Just call, **`#template`**. You even have multiple scope options.
-* Include CSS & JS files: `{{#include css|my_file_nickname /include}}`
-* Travarse up the scope chain for a var using: **`../`**, like `../../foo.bar`. (Finds foo.bar starting two levels up.)
+* Include CSS & JS files with **`#include`**.
+* Travarse up the scope chain for a var using: **`../`**, like `../../foo.bar`.
 * More "async" handling of template evaluation. Not really, but lots of promises.
 * New tests.
 
