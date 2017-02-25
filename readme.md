@@ -74,6 +74,7 @@ Or chain them, as you would in any language.
 
 ### Loops
 Loop over the elements of an array, easily.
+Assume `var people = [ {first: 'Alan', last: 'Alda'}, {first: 'Carl', last: 'Sagan'}];`
 
 ```
 	<ul>
@@ -189,7 +190,7 @@ Just bind them beforehand:
 ```
 `master_data` refers to the master data for the entire template.
 `my_file_nickname` refers to a machine name you'll use to reference your file.
-The names must be unique by type (one `my_css_one` per template), but you can have the same name for a css and js file.
+The names must be unique by type (one css named `my_css_one` per template), but you can have the same name for a css and js file.
 
 Include Multiple files in one command:
 ```
