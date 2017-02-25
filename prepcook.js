@@ -71,6 +71,41 @@ var chef = (function chefFactory() {
 	}
 
 
+
+	/**
+	 * Bind a subtemplate to the data object, so prepcook can resolve subtemplates later.
+	 * 
+	 * @param  {object} master_data
+	 *   The master data for the template. We'll bind any includes to it.
+	 * @param  {string} name
+	 *   The machine_name of the include.
+	 * @param  {string} type
+	 *   The type of include.
+	 * @param  {object} vars
+	 *   The specific info needed to evaluate this object. For css, this is the location/path to the file.
+	 * 
+	 * @return {object}
+	 *   The data object, with binding appended.
+	 */
+	function prepcookBindInclude(master_data, name, type, vars) {
+
+		master_data = prepcookPrepareData(master_data);
+
+		if (type == 'css') {
+			master_data.__prepcook.css[name] = {
+				path: vars
+			};
+		}
+		else if (type == 'js') {
+			master_data.__prepcook.js[name] = {
+				path: vars
+			};
+		}
+
+		return master_data;
+	}
+
+
 	/**
 	 * Initialize a template data object, if not already.
 	 * 
@@ -93,6 +128,9 @@ var chef = (function chefFactory() {
 		}
 		if (!data.__prepcook.templates) {
 			data.__prepcook.templates = [];
+		}
+		if (!data.__prepcook.css) {
+			data.__prepcook.css = {};
 		}
 
 		return data;
@@ -296,6 +334,39 @@ var chef = (function chefFactory() {
 			// Nothing to add, so resolve empty. 
 			node_resolve = Promise.resolve(result);
 		}
+		// Load any includes, including css and scripts.
+		else if (lang.isInclude(node.data.type) === true) {
+			try {
+				// Split our includes base dupon whitespace. 
+				// Make sure multiple lines/tabs/etc don't get special treatment.
+				var inc_data = node.data.data.split(/\s+/),
+					inc_result = '';
+				
+				if (typeof inc_data === 'string') {	inc_data = [inc_data]; }
+
+				for (a in inc_data) {
+					var inc = inc_data[a].split(':');
+
+					if (parseutil.isset(inc[0]) && parseutil.isset(inc[1])) {
+						if (!parseutil.isset(vars.__prepcook[inc[0]][inc[1]])) {
+							throw new Error('Include references an unbound file: ' + inc[0] + '.' + inc[1]);
+						}
+
+						if (inc[0] == 'css') {
+							inc_result += '<link rel="stylesheet" type="text/css" href="' + vars.__prepcook.css[inc[1]].path + '">';
+						}
+						else if(inc[0] == 'js') {
+							inc_result += '<script src="' + vars.__prepcook.js[inc[1]].path + '"></script>';
+						}
+					}
+				}
+				node_resolve = Promise.resolve(inc_result);
+			}
+			catch (err) {
+				Promise.reject('Problem with #include: ' + err);
+			}
+		}
+		// Loaders are sub templates, resolved via recursive parsing.
 		else if (lang.isLoader(node.data.type) === true) {
 			var tpl_name = node.data.data.split(':');
 			if (tpl_name[0] && vars.__prepcook.templates[tpl_name[0]]) {

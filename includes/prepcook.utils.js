@@ -158,6 +158,26 @@ var server_utils = (function utils() {
 
 
 	/**
+	 * Is this variable set?
+	 * 
+	 * @param  {mixed} item
+	 *   Varibable we're checking.
+	 * @param  {string} type
+	 *   Expected type.
+	 * 
+	 * @return {boolean}
+	 *   True if set. False in all other cases.
+	 */
+	function isset(item, type) {
+		if (typeof item !== 'undefined' && item !== null) {
+			return true;
+		}
+
+		return false;
+	}
+
+
+	/**
 	 * Unwrap a string wrapped by a delimeter.
 	 *
 	 * E.G 
@@ -356,6 +376,7 @@ var server_utils = (function utils() {
 		splitOnce: splitOnce,
 		firstOccuring: firstOccuring,
 		getObjectPath: getObjectPath,
+		isset: isset,
 		resolveVarPath: resolveVarPath,
 		normalizeExpression: normalizeExpression
 	};
@@ -365,6 +386,7 @@ module.exports = {
 	firstOccuring: server_utils.firstOccuring,
 	splitOnce: server_utils.splitOnce,
 	getObjectPath: server_utils.getObjectPath,
+	isset: server_utils.isset,
 	resolveVarPath: server_utils.resolveVarPath,
 	normalizeExpression: server_utils.normalizeExpression
 };

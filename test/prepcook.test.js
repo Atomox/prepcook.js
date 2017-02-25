@@ -30,9 +30,17 @@ describe('Prepcook Module', function() {
 			nested_template_b: '{{ [bar.baz] }} {{ #template my_other_temp }} {{[foo|uppercase]}}',
 			nested_template_c: '{{ [bar.baz] }} {{ #template my_temp }} {{ #template my_other_temp }} {{[foo|uppercase]}}',
 			nested_template_d: '{{ [bar.baz] }} {{ #each one #each two }} {{ #template my_third_template /template }} {{ /each /each }} {{[foo|uppercase]}}',
-			nested_path_template: '{{[a]}} {{ [b|lowercase]}} {{[c]}}'
-		};
+			nested_path_template: '{{[a]}} {{ [b|lowercase]}} {{[c]}}',
+			include_css: 		'{{[x]}}{{[y]}}{{#include css:my_style /include}} {{[z]}}',
+			include_js: 		'{{[x]}}{{[y]}}{{#include js:my_script /include}} {{[z]}}',
+			include_multiple: 	'{{[x]}}{{[y]}}{{#include css:my_style js:my_script /include}} {{[z]}}',
+			include_multiple_whitespace: `{{[x]}}{{[y]}}
+				{{#include
+					css:my_style
 
+					js:my_script 
+				/include}} {{[z]}}`
+		};
 
 		var data = {
 			foo: 'fubar',
@@ -45,6 +53,9 @@ describe('Prepcook Module', function() {
 			a: true,
 			b: true,
 			c: true,
+			x: 'X',
+			y: 'Y', 
+			z: 'Z',
 			one: [{
 				two: [{
 					a: 'A',
@@ -74,6 +85,16 @@ describe('Prepcook Module', function() {
 					},
 					my_third_template: {
 						template: templates.nested_path_template
+					}
+				},
+				css: {
+					my_style: {
+						path: '123/abc.css'
+					}
+				},
+				js: {
+					my_script: {
+						path: '789/xyz.js'
 					}
 				}
 			}
@@ -181,6 +202,44 @@ describe('Prepcook Module', function() {
 				.then(function(tpl) { 
 					assert.equal(123+BISTRO_FAILURE+'cde', tpl); });
 		});
+
+
+		/**
+		 * Includes
+		 */
+
+		 it ('Should include css files', function(){
+		 	return prepcook.processTemplate(data,templates.include_css)
+		 		.then(function (tpl) {
+		 			var expected = 'XY<link rel="stylesheet" type="text/css" href="123/abc.css">Z';
+		 			assert.equal(expected, tpl); });
+		 });
+		 it ('Should bind css files properly');
+		 it ('Should bind js files properly');
+		 it ('Should include js files', function(){
+		 	return prepcook.processTemplate(data,templates.include_js)
+		 		.then(function (tpl) {
+		 			var expected = 'XY<script src="789/xyz.js"></script>Z';
+		 			assert.equal(expected, tpl); });
+		 });
+		 it ('Should eval include\'s multiple syntax properly', function(){
+		 	return prepcook.processTemplate(data,templates.include_multiple)
+		 		.then(function (tpl) {
+		 			var expected = 'XY' 
+		 			+ '<link rel="stylesheet" type="text/css" href="123/abc.css">' 
+		 			+ '<script src="789/xyz.js"></script>'
+		 			+ 'Z';
+		 			assert.equal(expected, tpl); });
+		 });
+		 it ('Should eval include\'s multiple syntax properly, even when shitespaceis present', function(){
+		 	return prepcook.processTemplate(data,templates.include_multiple_whitespace)
+		 		.then(function (tpl) {
+		 			var expected = 'XY' 
+		 			+ '<link rel="stylesheet" type="text/css" href="123/abc.css">' 
+		 			+ '<script src="789/xyz.js"></script>'
+		 			+ 'Z';
+		 			assert.equal(expected, tpl); });
+		 });
 
 
 		/**

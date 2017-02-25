@@ -9,9 +9,10 @@ Templating based on concepts from handlebars.js and angular.js.
 [![Build Status](https://travis-ci.org/Atomox/prepcook.js.svg?branch=master)](https://travis-ci.org/Atomox/prepcook.js)
 
 ## Updates: 
-0.4.0
+0.4
 * We heard you like templates. Now you can put a [template inside your template](https://github.com/Atomox/prepcook.js/issues/3), using **`#template`**.
   * Pass your own scope variable, or maintain the current scope/data from the place/time it's called.
+* Include css & JS files: `{{#include css|my_file_nickname /include}}`
 * Travarse up the scope chain for a var using: **`../`**, like `../../foo.bar`. (Finds foo.bar starting two levels up.)
 * More "async" handling of template evaluation. Not really, but lots of promises.
 * New tests.
@@ -171,11 +172,46 @@ Output a variable in JSON format.
 
 
 
-## Nest templates:
+## Includes & Template Nesting
+
+
+### Includes
+
+Reference css or js files to be included cleanly.
+
+```
+	{{#include css|my_file_nickname /include}}
+```
+
+Just bind them beforehand: 
+```
+	prepcook.prepcookBindInclude(master_data, 'my_file_nickname', 'css', 'path/to/file.css');
+	prepcook.prepcookBindInclude(master_data, 'my_file_nickname', 'js', 'path/to/file.js');
+```
+`master_data` refers to the master data for the entire template.
+`my_file_nickname` refers to a machine name you'll use to reference your file.
+The names must be unique by type (one `my_css_one` per template), but you can have the same name for a css and js file.
+
+Include Multiple files in one command:
+```
+	{{#include 
+		css|my_file_nickname 
+		css|my_second_file
+		css|my_third_file
+
+		js|my_cool_js
+		js|another_js_file
+	/include}}
+```
+
+
+
+### Nest templates:
+
 Reference one template inside another:
 
 ```
-	{{#template template_ref_name}}
+	{{#template template_ref_name /template}}
 ```
 
 Setup just requires binding the templates before you render the master template:

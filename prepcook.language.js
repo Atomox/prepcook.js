@@ -29,7 +29,9 @@ var lang = (function languageFactory() {
 		'#unless',
 		'/unless',
 		'#template',
-		'/template'
+		'/template',
+		'#include',
+		'/include'
 	];
 
 	// The definition of each reserve word, it's type, and behavior.
@@ -86,6 +88,12 @@ var lang = (function languageFactory() {
 				behavior: 'loader',
 				start: '#template',
 				end: '/template'
+		},
+		'#include': {
+				type: 'loader',
+				behavior: 'include',
+				start: '#include',
+				end: '/include'
 		}
 	};
 
@@ -132,6 +140,11 @@ var lang = (function languageFactory() {
 
 	function isLoader (type) {
 		return (getWordDefinition(type).behavior == 'loader') ? true : false;
+	}
+
+
+	function isInclude (type) {
+		return (getWordDefinition(type).behavior == 'include') ? true : false;
 	}
 
 
@@ -280,6 +293,7 @@ var lang = (function languageFactory() {
 		isLinkedConditional: isLinkedConditional,
 		isIterator: isIterator,
 		isLoader: isLoader,
+		isInclude: isInclude,
 		resolveContent: resolveContent,
 		resolveConditional: resolveConditional
 	};
@@ -293,6 +307,7 @@ module.exports = {
 	isLinkedConditional: lang.isLinkedConditional,
 	isIterator: lang.isIterator,
 	isLoader: lang.isLoader,
+	isInclude: lang.isInclude,
 	resolveContent: lang.resolveContent,
 	resolveConditional: lang.resolveConditional
 };
