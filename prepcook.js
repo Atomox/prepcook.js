@@ -325,66 +325,22 @@ var chef = (function chefFactory() {
 			visit_children = true,
 			node_resolve = null;
 
-
 		// Check the current node's data, and apply it's data, if applicable.
 		if (!node.data) {
-			// Do nothing.
+			// Do not visit linked conditionals,
+			// nor do we have any content to add.
 			options.enable_linked_conditional = false;
-
-			// Nothing to add, so resolve empty. 
 			node_resolve = Promise.resolve(result);
 		}
 		// Load any includes, including css and scripts.
 		else if (lang.isInclude(node.data.type) === true) {
-			try {
-				// Split our includes base dupon whitespace. 
-				// Make sure multiple lines/tabs/etc don't get special treatment.
-				var inc_data = node.data.data.split(/\s+/),
-					inc_result = '';
-				
-				if (typeof inc_data === 'string') {	inc_data = [inc_data]; }
-
-				for (a in inc_data) {
-					var inc = inc_data[a].split(':');
-
-					if (parseutil.isset(inc[0]) && parseutil.isset(inc[1])) {
-						if (!parseutil.isset(vars.__prepcook[inc[0]][inc[1]])) {
-							throw new Error('Include references an unbound file: ' + inc[0] + '.' + inc[1]);
-						}
-
-						if (inc[0] == 'css') {
-							inc_result += '<link rel="stylesheet" type="text/css" href="' + vars.__prepcook.css[inc[1]].path + '">';
-						}
-						else if(inc[0] == 'js') {
-							inc_result += '<script src="' + vars.__prepcook.js[inc[1]].path + '"></script>';
-						}
-					}
-				}
-				node_resolve = Promise.resolve(inc_result);
-			}
-			catch (err) {
-				Promise.reject('Problem with #include: ' + err);
-			}
+			visit_children = false;
+			node_resolve = resolveInclude(node.data.data, vars);
 		}
 		// Loaders are sub templates, resolved via recursive parsing.
 		else if (lang.isLoader(node.data.type) === true) {
-			var tpl_name = node.data.data.split(':');
-			if (tpl_name[0] && vars.__prepcook.templates[tpl_name[0]]) {
-				var sub_tpl = vars.__prepcook.templates[tpl_name[0]];
-				var sub_tpl_vars = (sub_tpl.vars) ? sub_tpl.vars : vars;
-				var sub_tpl_path = null;
-				if (typeof tpl_name[1] !== 'undefined' && tpl_name[1] !== null) {
-					sub_tpl_path = tpl_name[1];
-				}
-				else if (typeof sub_tpl.vars === 'undefined') {
-					sub_tpl_path = curr_path;
-				}
-				node_resolve = processTemplate(sub_tpl_vars, sub_tpl.template, sub_tpl_path);
-			}
-			else {
-				// Nothing to add, so resolve empty. 
-				node_resolve = Promise.resolve(result);
-			}
+			visit_children = false;
+			node_resolve = resolveSubTemplate(node.data.data, vars, curr_path);
 		}
 		else {
 			// Do we show the data for this node, or is it a decider for how to show it's children?
@@ -392,12 +348,7 @@ var chef = (function chefFactory() {
 			if (lang.isConditional(node.data.type) === true) {
 				visit_children = lang.resolveConditional(node.data.type, node.data.data, vars, curr_path);
 
-				if (!visit_children) {
-					options.enable_linked_conditional = true;	
-				}
-				else {
-					options.enable_linked_conditional = false;
-				}
+				options.enable_linked_conditional = (!visit_children) ? true : false;	
 			}
 			else if (lang.isLinkedConditional(node.data.type) === true) {
 
@@ -445,8 +396,13 @@ var chef = (function chefFactory() {
 
 
 					if (visit_children === true) {
+						if (!parseutil.isset(children) || children.length <= 0) {
+							var my_type = (node.data) ? node.data.type : '<root>';
+							console.warn('No children to visit for statement: ', my_type);
+							resolve(result);
+						}
 						// Loops render their decendants more than once, generally.
-						if (node.data && lang.isIterator(node.data.type)) {
+						else if (node.data && lang.isIterator(node.data.type)) {
 							curr_vars = parseutil.resolveVarPath(vars, my_path);
 
 							if (typeof curr_vars[node.data.data] === 'undefined' || curr_vars[node.data.data] === null) {
@@ -574,6 +530,9 @@ var chef = (function chefFactory() {
 							options: options
 						});
 					}
+				}).catch(function(err){
+					var my_type = (node.data) ? node.data.type : '<root>';
+					console.log('Error during Phase 1 of tree traversal for type', my_type, '.', err);
 				});
 			});
 
@@ -589,13 +548,92 @@ var chef = (function chefFactory() {
 						options: child_results.options
 					});	
 				}
-			}).catch(function(err){
-				console.warn('Error finalizing final resolve step in traverseParseTree.', err);
+			}).catch(function(err) {
+				var my_type = (node.data) ? node.data.type : '<root>';
+				console.warn('Error finalizing final resolve step in traverseParseTree for operator, ' + my_type + '.', err);
 				reject(err);
 			});
 		});
 	}
 
+
+	/**
+	 * Resolve an #include statement.
+	 * 
+	 * @param  {Object} data
+	 *   Data from the #include's node.
+	 * @param  {Object} vars
+	 *   Master vars object for the template.
+	 * 
+	 * @return {Promise}
+	 *   resolved with result, or rejected with error.
+	 */
+	function resolveInclude (data, vars) {
+		try {
+			// Split our includes basedupon whitespace. 
+			// Make sure multiple lines/tabs/etc don't get special treatment.
+			var inc_data = data.split(/\s+/),
+				inc_result = '';
+			
+			if (typeof inc_data === 'string') {	inc_data = [inc_data]; }
+
+			for (a in inc_data) {
+				var inc = inc_data[a].split(':');
+
+				if (parseutil.isset(inc[0]) && parseutil.isset(inc[1])) {
+					if (!parseutil.isset(vars.__prepcook[inc[0]][inc[1]])) {
+						throw new Error('Include references an unbound file: ' + inc[0] + '.' + inc[1]);
+					}
+
+					if (inc[0] == 'css') {
+						console.log(vars.__prepcook.css[inc[1]]);
+						inc_result += '<link rel="stylesheet" type="text/css" href="' + vars.__prepcook.css[inc[1]].path + '">';
+					}
+					else if(inc[0] == 'js') {
+						inc_result += '<script src="' + vars.__prepcook.js[inc[1]].path + '"></script>';
+					}
+				}
+				else {
+					throw new Error('#include type, ' + inc[0] + ', could not be found. Check your include definition.');
+				}
+			}
+			return Promise.resolve(inc_result);
+		}
+		catch (err) {
+			return Promise.reject('Problem with #include: ' + err);
+		}
+	}
+
+
+	/**
+	 * Resolve a #template statement.
+	 * 
+	 * @param  {object} data
+	 *   The data on the #template's node.
+	 * @param  {object} vars
+	 *   The master vars object passed to the template.
+	 * 
+	 * @return {Promise}
+	 *   The promise, resolved with the rendered subtemplate, or empty if none could be found.
+	 */
+	function resolveSubTemplate(data, vars, curr_path) {		
+		var tpl_name = data.split(':');
+		if (tpl_name[0] && vars.__prepcook.templates[tpl_name[0]]) {
+			var sub_tpl = vars.__prepcook.templates[tpl_name[0]];
+			var sub_tpl_vars = (sub_tpl.vars) ? sub_tpl.vars : vars;
+			var sub_tpl_path = null;
+			if (typeof tpl_name[1] !== 'undefined' && tpl_name[1] !== null) {
+				sub_tpl_path = tpl_name[1];
+			}
+			else if (typeof sub_tpl.vars === 'undefined') {
+				sub_tpl_path = curr_path;
+			}
+			return processTemplate(sub_tpl_vars, sub_tpl.template, sub_tpl_path);
+		}
+
+		// Nothing to add, so resolve empty. 
+		return Promise.resolve('');
+	}
 
 	/**
 	 * Check for any reserve words, identify their segments from other reserve words, and return their object definition for the parse tree.
@@ -714,12 +752,14 @@ var chef = (function chefFactory() {
 	return {
 		processTemplate: processTemplate,
 		bindFunction: prepcookBindFunction,
-		bindSubTemplate: prepcookBindSubTemplate
+		bindSubTemplate: prepcookBindSubTemplate,
+		bindInclude: prepcookBindInclude
 	};
 })();
 
 module.exports = {
 	processTemplate: chef.processTemplate,
 	config: chef.bindFunction,
-	bindSubTemplate: chef.bindSubTemplate
+	bindSubTemplate: chef.bindSubTemplate,
+	bindInclude: chef.bindInclude
 };

@@ -14,7 +14,7 @@ Templating based on concepts from handlebars.js and angular.js.
 * Include CSS & JS files with **`#include`**.
 * Travarse up the scope chain for a var using: **`../`**, like `../../foo.bar`.
 * More "async" handling of template evaluation. Not really, but lots of promises.
-* New tests.
+* New tests + fixed tests.
 
 
 ## Using it is simple.
@@ -73,14 +73,14 @@ Or chain them, as you would in any language.
 
 
 ### Loops
-Loop over the elements of an array, easily.
-Assume `var people = [ {first: 'Alan', last: 'Alda'}, {first: 'Carl', last: 'Sagan'}];`
+Loop over the elements of an array, easily. 
 
 ```
 	<ul>
+		// An array of person object, with first and last name
 		{{ #each people }}
 				<li> 
-					Here's people.first, and people.last 
+					// Output each person's first & last name.
 					{{ [first] [last] }}
 				</li> 
 		{{ /each }}
@@ -321,6 +321,13 @@ Dependencies for node generally go in your project, under `/node_modules/[module
 
 
 ## Updates: 
+0.4.2
+* Fixed issues with #includes and binding. Cleanup, better error catching for loops/child iteration.
+* Fixed tests for #template.
+
+0.4.1
+* Include CSS & JS files with **`#include`**.
+
 0.4.0
 * We heard you like templates. Now you can put a [template inside your template](https://github.com/Atomox/prepcook.js/issues/3).
   * Pass your own scope variable, or maintain the current scope/data from the place/time it's called.
