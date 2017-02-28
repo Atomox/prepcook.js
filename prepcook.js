@@ -617,22 +617,44 @@ var chef = (function chefFactory() {
 	 *   The promise, resolved with the rendered subtemplate, or empty if none could be found.
 	 */
 	function resolveSubTemplate(data, vars, curr_path) {		
-		var tpl_name = data.split(':');
-		if (tpl_name[0] && vars.__prepcook.templates[tpl_name[0]]) {
-			var sub_tpl = vars.__prepcook.templates[tpl_name[0]];
-			var sub_tpl_vars = (sub_tpl.vars) ? sub_tpl.vars : vars;
-			var sub_tpl_path = null;
-			if (typeof tpl_name[1] !== 'undefined' && tpl_name[1] !== null) {
-				sub_tpl_path = tpl_name[1];
+		
+		return new Promise(function(resolve, reject) {
+			var tpl_name = data.split(':'),
+			load_tpl = null;
+			
+			if (tpl_name[0] && vars.__prepcook.templates[tpl_name[0]]) {
+				load_tpl = Promise.resolve(vars.__prepcook.templates[tpl_name[0]]);
 			}
-			else if (typeof sub_tpl.vars === 'undefined') {
-				sub_tpl_path = curr_path;
+			else if (typeof vars.__prepcook['#template'] == 'function') {
+				load_tpl = vars.__prepcook['#template'](tpl_name[0], true);
 			}
-			return processTemplate(sub_tpl_vars, sub_tpl.template, sub_tpl_path);
-		}
+			else {
+				load_tpl = Promise.reject('Could not find template by name');
+			}
 
-		// Nothing to add, so resolve empty. 
-		return Promise.resolve('');
+			load_tpl.then(function (sub_tpl) {
+
+				var sub_tpl_vars = (sub_tpl.vars) ? sub_tpl.vars : vars;
+				var sub_tpl_path = null;
+				if (typeof tpl_name[1] !== 'undefined' && tpl_name[1] !== null) {
+					sub_tpl_path = tpl_name[1];
+				}
+				else if (typeof sub_tpl.vars === 'undefined') {
+					sub_tpl_path = curr_path;
+				}
+				processTemplate(sub_tpl_vars, sub_tpl.template, sub_tpl_path).then(function(tpl) {
+					resolve(tpl);
+				})
+				.catch(function(err){
+					reject(err);
+				});
+			})
+			.catch(function(err) {
+				console.log('ResolveSubTemplate:', err);
+				// Nothing to add, so resolve empty. 
+				return Promise.resolve('');
+			});
+		});
 	}
 
 	/**

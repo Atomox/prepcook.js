@@ -268,6 +268,32 @@ E.G. If you #template is referenced when the parent template's scope is at: 'foo
 But, if you bind your own template's data, then it will refer to that data, even if it has the same name.
 
 
+### Resolve template at run-time:
+
+Don't want to preload the template variable ahead of time? No problem! Provide your own template look-up function, 
+and we'll call it when we encounter a `#template` we can't resolve.
+
+```
+	// Attach our template loader function to the Prepcook vars.
+	prepcook.config(master_vars, '#template', your_template_lookup_function);
+```
+
+We'll always try to resolve a template's name against a bound template first. When not found, we'll call the function above to try to find the template.
+
+Make sure your function returns a `Promise()`, which resolves in the following format:
+
+```
+	resolve({
+		template: /path/to.tpl,
+		vars: {
+			foo: bar,
+			a: '123'
+		}
+	});
+```
+
+`vars` is optional. See above to understand context.
+
 
 ### Just pass in a context:
 
