@@ -11,6 +11,7 @@ Templating based on concepts from handlebars.js and angular.js.
 ## Updates: 
 0.4.x
 * We heard you like templates. Now you can put a [template inside your template](https://github.com/Atomox/prepcook.js/issues/3). Just call, **`#template`**. You even have multiple scope options.
+  * [Resolve `#templates` at run-time](https://github.com/Atomox/prepcook.js/issues/12) by binding a look-up function with: *`.config()`*
 * Include CSS & JS files with **`#include`**.
 * Travarse up the scope chain for a var using: **`../`**, like `../../foo.bar`.
 * More "async" handling of template evaluation. Not really, but lots of promises.
@@ -347,6 +348,9 @@ Dependencies for node generally go in your project, under `/node_modules/[module
 
 
 ## Updates: 
+0.4.3
+* [Resolve `#templates` at run-time](https://github.com/Atomox/prepcook.js/issues/12) by binding a look-up function with: *`.config()`*
+
 0.4.2
 * Fixed issues with #includes and binding. Cleanup, better error catching for loops/child iteration.
 * Fixed tests for #template.
