@@ -348,6 +348,10 @@ Dependencies for node generally go in your project, under `/node_modules/[module
 
 
 ## Updates: 
+
+0.4.4
+* Resolved bug where [`#templates` loose their config](https://github.com/Atomox/prepcook.js/issues/13) when they provide their own vars.
+
 0.4.3
 * [Resolve `#templates` at run-time](https://github.com/Atomox/prepcook.js/issues/12) by binding a look-up function with: *`.config()`*
 

@@ -30,6 +30,7 @@ describe('Prepcook Module', function() {
 			nested_template_b: '{{ [bar.baz] }} {{ #template my_other_temp /template }} {{[foo|uppercase]}}',
 			nested_template_c: '{{ [bar.baz] }} {{ #template my_temp /template }} {{ #template my_other_temp /template }} {{[foo|uppercase]}}',
 			nested_template_d: '{{ [bar.baz] }} {{ #each one #each two }} {{ #template my_third_template /template }} {{ /each /each }} {{[foo|uppercase]}}',
+			nested_template_3_layer_with_data: '{{ [bar.baz] }} {{ #template my_nested_tpl_with_data /template }} {{[foo|uppercase]}}',
 			nested_path_template: '{{[a]}} {{ [b|lowercase]}} {{[c]}}',
 			include_css: 		'{{[x]}}{{[y]}}{{#include css:my_style /include}} {{[z]}}',
 			include_js: 		'{{[x]}}{{[y]}}{{#include js:my_script /include}} {{[z]}}',
@@ -41,6 +42,7 @@ describe('Prepcook Module', function() {
 					js:my_script 
 				/include}} {{[z]}}`
 		};
+
 
 		var data = {
 			foo: 'fubar',
@@ -85,6 +87,10 @@ describe('Prepcook Module', function() {
 					},
 					my_third_template: {
 						template: templates.nested_path_template
+					},
+					my_nested_tpl_with_data: {
+						template: '{{[d] [e] [f]}} {{#template my_other_temp /template}}',
+						vars: {	d: 'D',	e: 'E',	f: 'F', foo: 'foobar' }
 					}
 				},
 				css: {
@@ -281,6 +287,12 @@ describe('Prepcook Module', function() {
 			return prepcook.processTemplate(data, templates.nested_template_c)
 				.then(function(tpl) {
 					assert.equal('hi thereBfoobarAfubarFUBAR', tpl); });
+		});
+
+		it ('Should preserve __prepcook data when a nested template with it\'s own data calls a nested template.', function() {
+			return prepcook.processTemplate(data, templates.nested_template_3_layer_with_data)
+				.then(function(tpl) {
+					assert.equal('hi there' + 'DEF' + 'C' + 'foobar' + 'FUBAR', tpl); });
 		});
 
 		it ('Should eval a var path for a nested template without a dedicated var object.', function(){

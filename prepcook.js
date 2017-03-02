@@ -619,22 +619,35 @@ var chef = (function chefFactory() {
 	function resolveSubTemplate(data, vars, curr_path) {		
 		
 		return new Promise(function(resolve, reject) {
-			var tpl_name = data.split(':'),
-			load_tpl = null;
-			
-			if (tpl_name[0] && vars.__prepcook.templates[tpl_name[0]]) {
-				load_tpl = Promise.resolve(vars.__prepcook.templates[tpl_name[0]]);
+			try {
+				if (typeof vars.__prepcook === 'undefined' || vars.__prepcook === null) {
+					throw new Error('__prepcook not initialized.');
+				}
+
+				var tpl_name = data.split(':'),
+				load_tpl = null;
+				
+				if (tpl_name[0] && typeof vars.__prepcook.templates === 'object' && vars.__prepcook.templates[tpl_name[0]]) {
+					load_tpl = Promise.resolve(vars.__prepcook.templates[tpl_name[0]]);
+				}
+				else if (parseutil.isset(vars.__prepcook['#template']) && typeof vars.__prepcook['#template'] == 'function') {
+					load_tpl = vars.__prepcook['#template'](tpl_name[0], true);
+				}
+				else {
+					load_tpl = Promise.reject('Could not find template by name');
+				}
 			}
-			else if (typeof vars.__prepcook['#template'] == 'function') {
-				load_tpl = vars.__prepcook['#template'](tpl_name[0], true);
-			}
-			else {
-				load_tpl = Promise.reject('Could not find template by name');
+			catch(err) {
+				load_tpl = Promise.reject('Error finding subtemplate: ' + err);
 			}
 
 			load_tpl.then(function (sub_tpl) {
 
 				var sub_tpl_vars = (sub_tpl.vars) ? sub_tpl.vars : vars;
+
+				// Preserve prepcook config.
+				if (sub_tpl.vars) {	sub_tpl_vars['__prepcook'] = vars.__prepcook; }
+
 				var sub_tpl_path = null;
 				if (typeof tpl_name[1] !== 'undefined' && tpl_name[1] !== null) {
 					sub_tpl_path = tpl_name[1];
